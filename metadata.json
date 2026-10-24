@@ -1,0 +1,6 @@
+{
+  "name": "SEVA SUTRA — Navigable Pensions & Social Benefits",
+  "description": "Every benefit explained. Every beneficiary protected. Accessible civic-fintech platform for older adults and people with disabilities to track benefit processes, diagnose delayed payments, manage documents, and safely delegate caregiver permissions.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

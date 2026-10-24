@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-navy: #102137;
+    --color-teal: #087F78;
+    --color-mint: #E0F4EF;
+    --color-offwhite: #F7F9FC;
+    --color-risk: #C44848;
+    --font-display: 'Plus Jakarta Sans', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
+    --font-body: 'Atkinson Hyperlegible', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: #F7F9FC;
+    color: #102137;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Large Text Accessibility Mode */
+html.seva-large-text {
+  font-size: 118%;
+}
+
+html.seva-xlarge-text {
+  font-size: 132%;
+}
+
+/* High Contrast Accessibility Mode */
+html.seva-high-contrast body {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+}
+
+html.seva-high-contrast .seva-card {
+  background-color: #FFFFFF !important;
+  border: 2px solid #102137 !important;
+  box-shadow: none !important;
+}
+
+html.seva-high-contrast .seva-sidebar {
+  background-color: #091524 !important;
+  border-right: 2px solid #000000 !important;
+}
+
+/* Reduced Motion Accessibility Mode */
+html.seva-reduced-motion *,
+html.seva-reduced-motion *::before,
+html.seva-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Accessible Focus Ring */
+*:focus-visible {
+  outline: 3px solid #087F78;
+  outline-offset: 2px;
+}
