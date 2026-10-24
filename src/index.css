@@ -2,26 +2,55 @@
 
 @layer base {
   :root {
-    --color-navy: #102137;
-    --color-teal: #087F78;
-    --color-mint: #E0F4EF;
-    --color-offwhite: #F7F9FC;
-    --color-risk: #C44848;
-    --font-display: 'Plus Jakarta Sans', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
-    --font-body: 'Atkinson Hyperlegible', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
+    /* MIDNIGHT EMERALD LUXE — PREMIUM CIVIC FINTECH TOKENS */
+    --color-navy: #101B2D;
+    --color-emerald: #087F68;
+    --color-ivory: #F5F0E6;
+    --color-gold: #C5A267;
+    --color-white: #FFFFFF;
+    --color-warning: #B42332;
+
+    /* Font System: Manrope (Headings) + DM Sans (Body & UI) */
+    --font-display: 'Manrope', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
+    --font-body: 'DM Sans', 'Noto Sans Telugu', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
 
   body {
     font-family: var(--font-body);
-    background-color: #F7F9FC;
-    color: #102137;
-    line-height: 1.6;
+    background-color: var(--color-ivory);
+    color: var(--color-navy);
+    font-size: 16px;
+    line-height: 1.65;
   }
 
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
+    color: var(--color-navy);
     text-wrap: balance;
+    letter-spacing: -0.015em;
+  }
+
+  h1 {
+    font-size: clamp(1.85rem, 2.5vw, 2.35rem);
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  h2 {
+    font-size: clamp(1.35rem, 1.8vw, 1.65rem);
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: clamp(1.125rem, 1.4vw, 1.35rem);
+    line-height: 1.35;
+    font-weight: 700;
+  }
+
+  button, input, select, textarea {
+    font-family: var(--font-body);
   }
 
   .tabular-nums {
@@ -29,13 +58,20 @@
   }
 }
 
+/* Premium Card Surface */
+.seva-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2D9C8;
+  box-shadow: 0 1px 3px rgba(16, 27, 45, 0.04);
+}
+
 /* Large Text Accessibility Mode */
 html.seva-large-text {
-  font-size: 118%;
+  font-size: 115%;
 }
 
 html.seva-xlarge-text {
-  font-size: 132%;
+  font-size: 128%;
 }
 
 /* High Contrast Accessibility Mode */
@@ -46,13 +82,13 @@ html.seva-high-contrast body {
 
 html.seva-high-contrast .seva-card {
   background-color: #FFFFFF !important;
-  border: 2px solid #102137 !important;
+  border: 2px solid #101B2D !important;
   box-shadow: none !important;
 }
 
 html.seva-high-contrast .seva-sidebar {
-  background-color: #091524 !important;
-  border-right: 2px solid #000000 !important;
+  background-color: #0A121E !important;
+  border-right: 2px solid #C5A267 !important;
 }
 
 /* Reduced Motion Accessibility Mode */
@@ -67,6 +103,6 @@ html.seva-reduced-motion *::after {
 
 /* Accessible Focus Ring */
 *:focus-visible {
-  outline: 3px solid #087F78;
+  outline: 3px solid #087F68;
   outline-offset: 2px;
 }

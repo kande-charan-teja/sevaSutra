@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import {
   Bell,
-  CalendarClock,
   CheckCircle2,
   CheckSquare,
   Clock,
-  FileText,
-  Info,
+  PauseCircle,
+  PlayCircle,
+  RotateCcw,
   Square,
   Volume2,
   Wifi,
@@ -45,38 +45,41 @@ export const DocumentsDeadlinesPage: React.FC = () => {
     simulateConnectivityLoss,
     restoreConnectivity,
     updateOfflineDraftStep,
+    continueFromOfflineDraft,
+    repeatLastOfflineDraftStep,
     speakText,
     t,
   } = useSevaSutra();
 
   const [selectedDocId, setSelectedDocId] = useState<string>(documents[0]?.id || 'doc-life-cert');
+  const [taskPaused, setTaskPaused] = useState<boolean>(false);
   const selectedDoc = documents.find((d) => d.id === selectedDocId) || documents[0];
 
   return (
     <div className="space-y-8">
       {/* Header & 12-Day Verification Highlight */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 sm:p-7 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#102137]">
+            <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-[#101B2D]">
               Documents and Deadlines
             </h1>
-            <p className="text-sm text-slate-600">
+            <p className="text-base text-slate-700">
               Track document validity, manage reminder preferences, and complete your verification preparation checklist safely. No real government ID numbers are collected.
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="px-4 py-2 rounded-lg bg-amber-50 border border-amber-400 text-[#102137] text-xs sm:text-sm font-bold flex items-center gap-2 tabular-nums">
-              <Clock className="w-4 h-4 text-amber-700" />
+            <div className="px-4 py-2.5 rounded-xl bg-[#F5F0E6] border-2 border-[#C5A267] text-[#101B2D] text-sm font-bold flex items-center gap-2 tabular-nums">
+              <Clock className="w-4 h-4 text-[#087F68]" />
               <span>Primary Verification Deadline: Due in 12 Days (Nov 05, 2026)</span>
             </div>
           </div>
         </div>
 
         {/* Visual Deadline Timeline Bar */}
-        <div className="pt-3 border-t border-slate-100">
-          <div className="text-xs font-semibold text-slate-500 mb-2">
+        <div className="pt-3 border-t border-[#E2D9C8]">
+          <div className="text-sm font-bold text-[#101B2D] mb-2.5">
             90-Day Document &amp; Verification Horizon
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -87,20 +90,20 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                   key={doc.id}
                   type="button"
                   onClick={() => setSelectedDocId(doc.id)}
-                  className={`p-3.5 rounded-lg border text-left transition-colors ${
+                  className={`p-4 rounded-xl border text-left transition-colors ${
                     isSelected
-                      ? 'bg-[#102137] text-white border-[#102137]'
-                      : 'bg-slate-50 text-[#102137] border-slate-200 hover:bg-slate-100'
+                      ? 'bg-[#101B2D] text-white border-[#101B2D]'
+                      : 'bg-[#F5F0E6]/70 text-[#101B2D] border-[#C5A267]/50 hover:bg-[#F5F0E6]'
                   }`}
                 >
                   <div className="flex items-center justify-between text-xs font-mono tabular-nums">
                     <span>{doc.expiryDate}</span>
                     <span className="font-bold">{doc.daysRemaining}d left</span>
                   </div>
-                  <div className="text-sm font-bold mt-1 truncate">{doc.name}</div>
+                  <div className="text-sm font-bold mt-1.5 leading-snug">{doc.name}</div>
                   <div
-                    className={`text-xs mt-1 ${
-                      isSelected ? 'text-[#E0F4EF]' : 'text-slate-600'
+                    className={`text-xs mt-1 font-semibold ${
+                      isSelected ? 'text-[#C5A267]' : 'text-[#087F68]'
                     }`}
                   >
                     Status: {doc.verificationStatus}
@@ -119,21 +122,27 @@ export const DocumentsDeadlinesPage: React.FC = () => {
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className={`seva-card bg-white rounded-xl border p-5 space-y-3 ${
-                selectedDoc.id === doc.id ? 'border-[#087F78] ring-1 ring-[#087F78]' : 'border-slate-200'
+              className={`seva-card bg-[#FFFFFF] rounded-xl border p-5 sm:p-6 space-y-3.5 ${
+                selectedDoc.id === doc.id
+                  ? 'border-[#087F68] ring-1 ring-[#087F68]'
+                  : 'border-[#E2D9C8]'
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <span className="text-xs font-medium text-slate-500">{doc.category}</span>
-                  <h2 className="text-base sm:text-lg font-bold text-[#102137]">{doc.name}</h2>
+                  <span className="text-xs font-bold uppercase text-slate-600">
+                    {doc.category}
+                  </span>
+                  <h2 className="font-display text-lg sm:text-xl font-bold text-[#101B2D]">
+                    {doc.name}
+                  </h2>
                 </div>
-                <div className="text-xs font-bold text-[#087F78] tabular-nums">
+                <div className="text-xs sm:text-sm font-bold text-[#087F68] tabular-nums">
                   {doc.verificationStatus} · {doc.daysRemaining} days remaining
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm text-[#101B2D] bg-[#F5F0E6]/60 p-3.5 rounded-lg border border-[#E2D9C8]">
                 <div>
                   <strong>Expiry Date:</strong>{' '}
                   <span className="font-mono tabular-nums">{doc.expiryDate}</span>
@@ -143,19 +152,19 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E2D9C8]">
                 {/* Reminder controls */}
-                <div className="flex flex-wrap items-center gap-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
                   <button
                     type="button"
                     onClick={() => toggleDocumentReminder(doc.id)}
-                    className={`px-3 py-1.5 rounded-md font-semibold inline-flex items-center gap-1.5 border ${
+                    className={`px-3 py-1.5 rounded-lg font-bold inline-flex items-center gap-1.5 border ${
                       doc.reminderEnabled
-                        ? 'bg-[#E0F4EF] text-[#102137] border-[#087F78]/40'
+                        ? 'bg-[#F5F0E6] text-[#101B2D] border-[#087F68]'
                         : 'bg-white text-slate-600 border-slate-300'
                     }`}
                   >
-                    <Bell className="w-3.5 h-3.5" />
+                    <Bell className="w-3.5 h-3.5 text-[#087F68]" />
                     <span>{doc.reminderEnabled ? 'Reminder On' : 'Reminder Off'}</span>
                   </button>
 
@@ -171,7 +180,7 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                         e.target.value as DocumentItem['reminderChannel']
                       )
                     }
-                    className="px-2.5 py-1.5 rounded-md border border-slate-300 bg-white text-[#102137] text-xs font-medium"
+                    className="px-3 py-1.5 rounded-lg border border-[#C5A267] bg-white text-[#101B2D] text-xs sm:text-sm font-semibold"
                   >
                     <option value="In-App Banner">In-App Banner</option>
                     <option value="SMS (Simulated)">SMS (Simulated)</option>
@@ -183,17 +192,17 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedDocId(doc.id)}
-                    className="px-3 py-1.5 rounded-md border border-slate-300 text-xs font-semibold text-[#102137] hover:bg-slate-50"
+                    className="px-3 py-1.5 rounded-lg border border-[#C5A267] bg-[#F5F0E6] text-xs sm:text-sm font-bold text-[#101B2D] hover:bg-[#ebe3d3]"
                   >
                     Inspect Details
                   </button>
                   <button
                     type="button"
                     onClick={() => markDocumentCompleted(doc.id)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold inline-flex items-center gap-1.5 ${
+                    className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 ${
                       doc.completed
-                        ? 'bg-[#E0F4EF] text-[#102137]'
-                        : 'bg-[#087F78] text-white hover:bg-[#066963]'
+                        ? 'bg-[#101B2D] text-white'
+                        : 'bg-[#087F68] text-white hover:bg-[#066552]'
                     }`}
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -205,12 +214,12 @@ export const DocumentsDeadlinesPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Right Column: Accessible Next-Step Detail & Offline Stress-Test Checklist */}
+        {/* Right Column: Accessible Next-Step Detail & Complete Offline Recovery Module */}
         <div className="lg:col-span-5 space-y-6">
           {/* Selected Document Detail Card */}
-          <div className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+          <div className="seva-card bg-[#FFFFFF] rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase text-[#087F78]">
+              <span className="text-xs font-bold uppercase text-[#087F68]">
                 Accessible Document Explanation
               </span>
               <button
@@ -218,75 +227,136 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                 onClick={() =>
                   speakText(`${selectedDoc.name}. ${selectedDoc.plainLanguageNextStep}`)
                 }
-                className="text-xs font-semibold text-[#087F78] hover:underline inline-flex items-center gap-1"
+                className="text-sm font-bold text-[#087F68] hover:underline inline-flex items-center gap-1"
               >
-                <Volume2 className="w-3.5 h-3.5" />
+                <Volume2 className="w-4 h-4" />
                 Read aloud
               </button>
             </div>
 
-            <h3 className="text-lg font-bold text-[#102137]">{selectedDoc.name}</h3>
-            <p className="text-sm text-slate-700 leading-relaxed">
+            <h3 className="font-display text-xl font-bold text-[#101B2D]">
+              {selectedDoc.name}
+            </h3>
+            <p className="text-base text-slate-800 leading-relaxed">
               {selectedDoc.plainLanguageNextStep}
             </p>
 
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1">
-              <div>
-                <strong>Privacy &amp; Honesty Note:</strong> This prototype does not collect real Aadhaar/government ID numbers or transmit documents to an external authority. Marking a task completed updates your local demonstration checklist.
-              </div>
+            <div className="p-3.5 rounded-xl bg-[#F5F0E6] border border-[#C5A267] text-xs sm:text-sm text-[#101B2D]">
+              <strong>Privacy &amp; Honesty Note:</strong> This prototype does not collect real government ID numbers or transmit documents to an external authority. Marking a task completed updates your local demonstration checklist.
             </div>
           </div>
 
-          {/* Offline Recovery & Connectivity Loss Stress-Test Module */}
-          <div className="seva-card bg-white rounded-xl border-2 border-[#102137] p-6 space-y-4">
+          {/* Complete Offline Recovery & Connectivity Loss Stress-Test Module */}
+          <div className="seva-card bg-[#FFFFFF] rounded-xl border-2 border-[#101B2D] p-6 space-y-4">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <span className="text-xs font-mono font-bold uppercase text-[#087F78]">
-                  Offline Recovery &amp; Stress-Test Workflow
+                <span className="text-xs font-mono font-bold uppercase text-[#087F68]">
+                  Offline Recovery &amp; Task Resumption
                 </span>
-                <h3 className="text-lg font-bold text-[#102137]">
+                <h3 className="font-display text-xl font-bold text-[#101B2D]">
                   Guided Verification Preparation Checklist
                 </h3>
               </div>
               <span
-                className={`px-2.5 py-1 rounded text-xs font-bold ${
+                className={`px-3 py-1 rounded-md text-xs font-bold ${
                   isOfflineSimulated
-                    ? 'bg-[#C44848] text-white'
-                    : 'bg-[#E0F4EF] text-[#102137]'
+                    ? 'bg-[#B42332] text-white'
+                    : 'bg-[#F5F0E6] border border-[#C5A267] text-[#101B2D]'
                 }`}
               >
                 {t.offlineSavedLocally}
               </span>
             </div>
 
-            <p className="text-xs text-slate-600">
-              Test dropping connectivity while halfway through verification. Your steps are preserved in IndexedDB and LocalStorage and survive page refresh.
+            <p className="text-sm text-slate-700">
+              Test dropping connectivity mid-task. Your checklist state is saved locally in IndexedDB and LocalStorage. After reconnection, use <strong>Continue</strong> or <strong>Repeat last step</strong>.
             </p>
 
+            {/* Offline / Reconnect / Pause Controls */}
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={simulateConnectivityLoss}
                 disabled={isOfflineSimulated}
-                className="px-3 py-2 rounded-lg bg-[#C44848] text-white text-xs font-semibold disabled:opacity-40 inline-flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-lg bg-[#B42332] text-white text-xs sm:text-sm font-bold disabled:opacity-40 inline-flex items-center gap-1.5"
               >
-                <WifiOff className="w-3.5 h-3.5" />
-                <span>Simulate Connectivity Drop Mid-Task</span>
+                <WifiOff className="w-4 h-4" />
+                <span>Simulate Connectivity Loss</span>
               </button>
 
               <button
                 type="button"
                 onClick={restoreConnectivity}
                 disabled={!isOfflineSimulated}
-                className="px-3 py-2 rounded-lg bg-[#087F78] text-white text-xs font-semibold disabled:opacity-40 inline-flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-lg bg-[#087F68] text-white text-xs sm:text-sm font-bold disabled:opacity-40 inline-flex items-center gap-1.5"
               >
-                <Wifi className="w-3.5 h-3.5" />
-                <span>Restore Connection &amp; Hear Read-Back</span>
+                <Wifi className="w-4 h-4" />
+                <span>Restore Connection &amp; Read-Back</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !taskPaused;
+                  setTaskPaused(next);
+                  if (!next) {
+                    speakText(t.readBackScript);
+                  }
+                }}
+                className="px-3.5 py-2 rounded-lg border border-[#C5A267] bg-[#F5F0E6] text-[#101B2D] text-xs sm:text-sm font-bold inline-flex items-center gap-1.5"
+              >
+                {taskPaused ? (
+                  <>
+                    <PlayCircle className="w-4 h-4 text-[#087F68]" />
+                    <span>Resume Task</span>
+                  </>
+                ) : (
+                  <>
+                    <PauseCircle className="w-4 h-4 text-[#101B2D]" />
+                    <span>Pause Task</span>
+                  </>
+                )}
               </button>
             </div>
 
+            {/* Post-Reconnection Continue & Repeat Last Step Controls */}
+            <div className="p-3.5 rounded-xl bg-[#F5F0E6] border border-[#C5A267] space-y-2.5">
+              <div className="text-xs font-bold uppercase text-[#101B2D]">
+                Post-Reconnection Task Resumption Controls
+              </div>
+              <p className="text-xs sm:text-sm text-slate-800">
+                Last confirmed step: <strong>{offlineDraft.lastConfirmedStep}</strong>. Verification has <strong>not</strong> been officially submitted.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={continueFromOfflineDraft}
+                  className="px-3.5 py-1.5 rounded-lg bg-[#087F68] hover:bg-[#066552] text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5"
+                >
+                  <PlayCircle className="w-3.5 h-3.5" />
+                  <span>Continue</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={repeatLastOfflineDraftStep}
+                  className="px-3.5 py-1.5 rounded-lg bg-[#101B2D] hover:bg-slate-800 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Repeat last step</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => speakText(t.readBackScript)}
+                  className="px-3 py-1.5 rounded-lg border border-[#C5A267] bg-white text-[#101B2D] text-xs sm:text-sm font-bold inline-flex items-center gap-1.5"
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-[#087F68]" />
+                  <span>Speak Read-Back</span>
+                </button>
+              </div>
+            </div>
+
             {/* Checklist Steps */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-1">
               {OFFLINE_VERIFICATION_STEPS.map((step) => {
                 const checked = offlineDraft.completedStepIds.includes(step.id);
                 return (
@@ -294,14 +364,14 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                     key={step.id}
                     type="button"
                     onClick={() => updateOfflineDraftStep(step.id, step.label)}
-                    className={`w-full p-3 rounded-lg border text-left text-xs sm:text-sm flex items-start gap-2.5 transition-colors ${
+                    className={`w-full p-3.5 rounded-xl border text-left text-sm flex items-start gap-2.5 transition-colors ${
                       checked
-                        ? 'bg-[#E0F4EF]/60 border-[#087F78] text-[#102137] font-semibold'
-                        : 'bg-slate-50 border-slate-200 text-slate-700'
+                        ? 'bg-[#F5F0E6] border-[#087F68] text-[#101B2D] font-bold'
+                        : 'bg-white border-[#E2D9C8] text-slate-800'
                     }`}
                   >
                     {checked ? (
-                      <CheckSquare className="w-4 h-4 text-[#087F78] shrink-0 mt-0.5" />
+                      <CheckSquare className="w-4 h-4 text-[#087F68] shrink-0 mt-0.5" />
                     ) : (
                       <Square className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                     )}
@@ -309,25 +379,6 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                   </button>
                 );
               })}
-            </div>
-
-            <div className="pt-2 border-t border-slate-200 text-xs text-slate-600 space-y-1">
-              <div>
-                <strong>Last Confirmed Step:</strong> {offlineDraft.lastConfirmedStep} (Saved at {offlineDraft.savedAt})
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={() => speakText(t.readBackScript)}
-                  className="text-[#087F78] font-semibold hover:underline inline-flex items-center gap-1"
-                >
-                  <Volume2 className="w-3.5 h-3.5" />
-                  Test Spoken Read-Back Script
-                </button>
-                <span className="font-mono text-[11px] text-slate-500">
-                  IndexedDB + LocalStorage Active
-                </span>
-              </div>
             </div>
           </div>
         </div>

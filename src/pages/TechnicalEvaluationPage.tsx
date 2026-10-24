@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Activity,
   ArrowDown,
-  CheckCircle2,
   Cpu,
   Play,
   ShieldCheck,
@@ -118,16 +117,16 @@ export const TechnicalEvaluationPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header & Master Benchmark Trigger */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="text-xs font-mono uppercase text-[#087F78] font-bold">
+          <div className="space-y-1.5">
+            <div className="text-sm font-mono uppercase tracking-wider text-[#087F68] font-bold">
               Architecture Transparency &amp; Live Prototype Evaluation Suite
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#102137]">
+            <h1 className="text-[32px] sm:text-[38px] font-bold text-[#101B2D] leading-tight">
               Technical Overview and Evaluation
             </h1>
-            <p className="text-sm text-slate-600">
+            <p className="text-[16px] sm:text-[17px] text-[#334155]">
               Inspect the 6-layer system architecture and run live, un-fabricated evaluation benchmarks across Security Effectiveness, Accessibility Task Success, and Diagnostic Accuracy.
             </p>
           </div>
@@ -135,7 +134,7 @@ export const TechnicalEvaluationPage: React.FC = () => {
           <button
             type="button"
             onClick={handleRunAllBenchmarks}
-            className="px-5 py-3 rounded-lg bg-[#087F78] hover:bg-[#066963] text-white text-sm font-bold inline-flex items-center gap-2 shrink-0 cursor-pointer"
+            className="px-5 py-3 rounded-lg bg-[#087F68] hover:bg-[#066552] text-white text-base font-bold inline-flex items-center gap-2 shrink-0 cursor-pointer shadow-sm"
           >
             <Play className="w-4 h-4" />
             <span>Run All Live Evaluation Tests</span>
@@ -144,18 +143,18 @@ export const TechnicalEvaluationPage: React.FC = () => {
       </section>
 
       {/* Section 1: Editable Responsive 6-Layer Architecture Diagram */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-5">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-              <Cpu className="w-5 h-5 text-[#087F78]" />
+            <h2 className="text-[22px] sm:text-[26px] font-bold text-[#101B2D] flex items-center gap-2.5">
+              <Cpu className="w-6 h-6 text-[#087F68]" />
               <span>How This Works — Editable 6-Layer Architecture Diagram</span>
             </h2>
-            <p className="text-xs text-slate-600">
+            <p className="text-[15px] text-[#334155]">
               Click any architecture layer to inspect its TypeScript module path or edit its technical annotation note.
             </p>
           </div>
-          <span className="text-xs font-mono text-slate-500">
+          <span className="text-sm font-mono text-[#334155]">
             Future external integrations are explicitly labelled NOT CONNECTED
           </span>
         </div>
@@ -172,33 +171,33 @@ export const TechnicalEvaluationPage: React.FC = () => {
                     onClick={() => setSelectedLayerId(layer.id)}
                     className={`w-full p-4 rounded-xl border text-left transition-colors ${
                       !layer.isConnectedInPrototype
-                        ? 'bg-slate-100 border-dashed border-slate-400 text-slate-800'
+                        ? 'bg-[#F5F0E6]/60 border-dashed border-[#C5A267] text-[#101B2D]'
                         : isSelected
-                          ? 'bg-[#102137] text-white border-[#102137]'
-                          : 'bg-slate-50 text-[#102137] border-slate-200 hover:bg-slate-100'
+                          ? 'bg-[#101B2D] text-white border-[#101B2D]'
+                          : 'bg-[#F5F0E6]/80 text-[#101B2D] border-[#C5A267]/40 hover:bg-[#EAE3D5]'
                     }`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-sm font-bold">
+                      <span className="text-base font-bold">
                         {layer.layerNumber}. {layer.title}
                       </span>
                       <span
-                        className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
+                        className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded ${
                           !layer.isConnectedInPrototype
-                            ? 'bg-amber-100 text-amber-900'
+                            ? 'bg-[#C5A267]/30 text-[#101B2D]'
                             : isSelected
-                              ? 'bg-[#087F78] text-white'
-                              : 'bg-[#E0F4EF] text-[#087F78]'
+                              ? 'bg-[#087F68] text-white'
+                              : 'bg-[#087F68]/15 text-[#087F68]'
                         }`}
                       >
                         {layer.statusLabel}
                       </span>
                     </div>
                     <div
-                      className={`text-xs font-mono mt-1 ${
+                      className={`text-xs sm:text-sm font-mono mt-1 ${
                         isSelected && layer.isConnectedInPrototype
-                          ? 'text-slate-300'
-                          : 'text-slate-500'
+                          ? 'text-[#F5F0E6]/80'
+                          : 'text-[#334155]'
                       }`}
                     >
                       {layer.modulePath}
@@ -207,7 +206,7 @@ export const TechnicalEvaluationPage: React.FC = () => {
 
                   {index < archLayers.length - 1 && (
                     <div className="flex justify-center py-0.5" aria-hidden="true">
-                      <ArrowDown className="w-4 h-4 text-[#087F78]" />
+                      <ArrowDown className="w-4 h-4 text-[#087F68]" />
                     </div>
                   )}
                 </React.Fragment>
@@ -216,19 +215,19 @@ export const TechnicalEvaluationPage: React.FC = () => {
           </div>
 
           {/* Editable Inspector Panel */}
-          <div className="lg:col-span-5 p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+          <div className="lg:col-span-5 p-5 sm:p-6 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/45 space-y-4">
             <div className="space-y-1">
-              <span className="text-xs font-mono uppercase text-[#087F78] font-bold">
+              <span className="text-sm font-mono uppercase text-[#087F68] font-bold">
                 Layer {selectedLayer.layerNumber} Inspector &amp; Annotation Editor
               </span>
-              <h3 className="text-lg font-bold text-[#102137]">{selectedLayer.title}</h3>
-              <p className="text-xs font-mono text-slate-600">{selectedLayer.modulePath}</p>
+              <h3 className="text-[20px] font-bold text-[#101B2D]">{selectedLayer.title}</h3>
+              <p className="text-sm font-mono text-[#334155]">{selectedLayer.modulePath}</p>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label
                 htmlFor="arch-note-editor"
-                className="block text-xs font-bold text-[#102137]"
+                className="block text-sm font-bold text-[#101B2D]"
               >
                 Editable Architecture Specification Note:
               </label>
@@ -244,11 +243,11 @@ export const TechnicalEvaluationPage: React.FC = () => {
                     )
                   );
                 }}
-                className="w-full p-3 rounded-lg border border-slate-300 bg-white text-xs sm:text-sm text-[#102137]"
+                className="w-full p-3.5 rounded-lg border border-[#C5A267]/50 bg-white text-sm sm:text-base text-[#101B2D]"
               />
             </div>
 
-            <div className="p-3 rounded-lg bg-white border border-slate-200 text-xs text-slate-600">
+            <div className="p-3.5 rounded-lg bg-white border border-[#C5A267]/35 text-sm text-[#334155]">
               <strong>Integration Status:</strong>{' '}
               {selectedLayer.isConnectedInPrototype
                 ? 'Implemented & active in local TypeScript modules.'
@@ -259,20 +258,20 @@ export const TechnicalEvaluationPage: React.FC = () => {
       </section>
 
       {/* Metric 1: SECURITY EFFECTIVENESS */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#C5A267]/25 pb-4">
           <div>
-            <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#087F78]" />
+            <h2 className="text-[22px] sm:text-[26px] font-bold text-[#101B2D] flex items-center gap-2.5">
+              <ShieldCheck className="w-6 h-6 text-[#087F68]" />
               <span>Metric 1: Security Effectiveness (Seeded Abuse Scenarios)</span>
             </h2>
-            <p className="text-xs text-slate-600">
+            <p className="text-[15px] text-[#334155]">
               Calculates the fraction of 6 seeded caregiver abuse scenarios correctly blocked or escalated.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-mono font-bold tabular-nums text-[#102137]">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-base font-mono font-bold tabular-nums text-[#101B2D]">
               Status:{' '}
               {securityEval
                 ? `${securityEval.blockedOrEscalatedCount} / ${securityEval.totalScenarios} Blocked or Escalated (${securityEval.effectivenessRatePct}%)`
@@ -281,7 +280,7 @@ export const TechnicalEvaluationPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setSecurityEval(runSecurityEffectivenessBenchmark())}
-              className="px-3.5 py-2 rounded-lg bg-[#102137] text-white text-xs font-semibold hover:bg-slate-800"
+              className="px-4 py-2.5 rounded-lg bg-[#101B2D] text-white text-sm font-semibold hover:bg-[#192841]"
             >
               Run Security Test Suite
             </button>
@@ -289,24 +288,24 @@ export const TechnicalEvaluationPage: React.FC = () => {
         </div>
 
         {!securityEval ? (
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-600 font-medium">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 text-base text-[#101B2D] font-medium">
             Evaluation Status: <strong>Not measured yet</strong>. Click “Run Security Test Suite” or “Run All Live Evaluation Tests” to execute the 6 abuse checks against <code className="font-mono">permissionAndRisk.ts</code>.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {securityEval.scenarios.map((sc) => (
               <div
                 key={sc.id}
-                className="p-4 rounded-lg border border-[#087F78]/40 bg-[#E0F4EF]/30 space-y-1.5 text-xs"
+                className="p-4 rounded-xl border border-[#087F68]/40 bg-[#087F68]/10 space-y-1.5 text-sm"
               >
-                <div className="flex items-center justify-between font-bold text-[#102137]">
+                <div className="flex items-center justify-between font-bold text-[#101B2D]">
                   <span>{sc.title}</span>
-                  <span className="text-[#087F78]">
+                  <span className="text-[#087F68]">
                     {sc.blockedOrEscalated ? 'BLOCKED / ESCALATED ✓' : 'FAILED'}
                   </span>
                 </div>
-                <p className="text-slate-600">{sc.description}</p>
-                <div className="font-mono text-[11px] text-[#102137] pt-1">
+                <p className="text-[#334155]">{sc.description}</p>
+                <div className="font-mono text-xs text-[#101B2D] pt-1 font-semibold">
                   Actual: {sc.actualOutcome}
                 </div>
               </div>
@@ -316,20 +315,20 @@ export const TechnicalEvaluationPage: React.FC = () => {
       </section>
 
       {/* Metric 2: DIAGNOSTIC ACCURACY */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#C5A267]/25 pb-4">
           <div>
-            <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-              <Activity className="w-5 h-5 text-[#087F78]" />
+            <h2 className="text-[22px] sm:text-[26px] font-bold text-[#101B2D] flex items-center gap-2.5">
+              <Activity className="w-6 h-6 text-[#087F68]" />
               <span>Metric 2: Diagnostic Accuracy (5 Causes + Incomplete Evidence)</span>
             </h2>
-            <p className="text-xs text-slate-600">
+            <p className="text-[15px] text-[#334155]">
               Compares deterministic <code className="font-mono">runPaymentDiagnosis</code> outputs against known seeded scenarios.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-mono font-bold tabular-nums text-[#102137]">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-base font-mono font-bold tabular-nums text-[#101B2D]">
               Status:{' '}
               {diagnosticEval
                 ? `${diagnosticEval.correctCount} / ${diagnosticEval.totalCases} Correct (${diagnosticEval.accuracyPct}%)`
@@ -338,7 +337,7 @@ export const TechnicalEvaluationPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setDiagnosticEval(runDiagnosticAccuracyBenchmark())}
-              className="px-3.5 py-2 rounded-lg bg-[#102137] text-white text-xs font-semibold hover:bg-slate-800"
+              className="px-4 py-2.5 rounded-lg bg-[#101B2D] text-white text-sm font-semibold hover:bg-[#192841]"
             >
               Run Diagnostic Benchmark
             </button>
@@ -346,59 +345,59 @@ export const TechnicalEvaluationPage: React.FC = () => {
         </div>
 
         {!diagnosticEval ? (
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-600 font-medium">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 text-base text-[#101B2D] font-medium">
             Evaluation Status: <strong>Not measured yet</strong>. Click “Run Diagnostic Benchmark” to test all 5 required causes and incomplete evidence handling.
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-slate-500">Cases Tested</div>
-                <div className="text-lg font-bold font-mono tabular-nums text-[#102137]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-sm">
+              <div className="p-3.5 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/35">
+                <div className="text-[#334155]">Cases Tested</div>
+                <div className="text-xl font-bold font-mono tabular-nums text-[#101B2D]">
                   {diagnosticEval.totalCases}
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-[#E0F4EF]/50 border border-[#087F78]/30">
-                <div className="text-slate-600">Correct Classifications</div>
-                <div className="text-lg font-bold font-mono tabular-nums text-[#087F78]">
+              <div className="p-3.5 rounded-xl bg-[#087F68]/10 border border-[#087F68]/35">
+                <div className="text-[#334155]">Correct Classifications</div>
+                <div className="text-xl font-bold font-mono tabular-nums text-[#087F68]">
                   {diagnosticEval.correctCount}
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-slate-500">Incorrect Classifications</div>
-                <div className="text-lg font-bold font-mono tabular-nums text-[#102137]">
+              <div className="p-3.5 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/35">
+                <div className="text-[#334155]">Incorrect Classifications</div>
+                <div className="text-xl font-bold font-mono tabular-nums text-[#101B2D]">
                   {diagnosticEval.incorrectCount}
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <div className="text-slate-500">Evaluation Status</div>
-                <div className="text-sm font-bold text-[#087F78]">
+              <div className="p-3.5 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/35">
+                <div className="text-[#334155]">Evaluation Status</div>
+                <div className="text-base font-bold text-[#087F68]">
                   Measured ({diagnosticEval.accuracyPct}% Match)
                 </div>
               </div>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full text-left border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className="py-2 pr-3">Seeded Test Scenario</th>
-                    <th className="py-2 pr-3">Produced Diagnosis Title</th>
-                    <th className="py-2 pr-3">Certainty Classification</th>
-                    <th className="py-2">Result</th>
+                  <tr className="border-b border-[#C5A267]/35 text-[#334155]">
+                    <th className="py-2.5 pr-3 font-bold">Seeded Test Scenario</th>
+                    <th className="py-2.5 pr-3 font-bold">Produced Diagnosis Title</th>
+                    <th className="py-2.5 pr-3 font-bold">Certainty Classification</th>
+                    <th className="py-2.5 font-bold">Result</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#C5A267]/20">
                   {diagnosticEval.cases.map((c) => (
                     <tr key={c.scenarioId}>
-                      <td className="py-2.5 pr-3 font-semibold text-[#102137]">
+                      <td className="py-3 pr-3 font-bold text-[#101B2D]">
                         {c.scenarioName}
                       </td>
-                      <td className="py-2.5 pr-3 text-slate-700">{c.actualTitle}</td>
-                      <td className="py-2.5 pr-3 font-mono text-slate-600">
+                      <td className="py-3 pr-3 text-[#334155]">{c.actualTitle}</td>
+                      <td className="py-3 pr-3 font-mono text-[#334155]">
                         {c.actualClassification}
                       </td>
-                      <td className="py-2.5 font-bold text-[#087F78]">
+                      <td className="py-3 font-bold text-[#087F68]">
                         {c.passed ? 'PASS ✓' : 'FAIL'}
                       </td>
                     </tr>
@@ -411,20 +410,20 @@ export const TechnicalEvaluationPage: React.FC = () => {
       </section>
 
       {/* Metric 3: ACCESSIBILITY TASK SUCCESS */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#C5A267]/25 pb-4">
           <div>
-            <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-[#087F78]" />
+            <h2 className="text-[22px] sm:text-[26px] font-bold text-[#101B2D] flex items-center gap-2.5">
+              <Sliders className="w-6 h-6 text-[#087F68]" />
               <span>Metric 3: Accessibility Task Success (Automated vs. Manual Assessment)</span>
             </h2>
-            <p className="text-xs text-slate-600">
+            <p className="text-[15px] text-[#334155]">
               Clearly distinguishes automated technical checks from manual accessibility evaluation and testing with intended older-adult users.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-mono font-bold text-[#102137]">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-base font-mono font-bold text-[#101B2D]">
               Status:{' '}
               {accessibilityMeasured
                 ? `${Object.values(manualAccessChecks).filter(Boolean).length} / 6 Verified`
@@ -433,21 +432,21 @@ export const TechnicalEvaluationPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setAccessibilityMeasured(true)}
-              className="px-3.5 py-2 rounded-lg bg-[#102137] text-white text-xs font-semibold hover:bg-slate-800"
+              className="px-4 py-2.5 rounded-lg bg-[#101B2D] text-white text-sm font-semibold hover:bg-[#192841]"
             >
               Verify Accessibility Checklist
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm sm:text-base">
           {[
             {
               key: 'keyboard_nav',
               title: '1. Keyboard-Only Navigation & Focus Indicators',
               type: 'Automated DOM Check + Manual Tab Order Review',
               detail:
-                'All cards, buttons, role switches, and tabs use native <button>/<input>/<select> elements with 3px #087F78 focus-visible rings.',
+                'All cards, buttons, role switches, and tabs use native <button>/<input>/<select> elements with 3px #087F68 focus-visible rings.',
             },
             {
               key: 'enlarged_text',
@@ -487,7 +486,7 @@ export const TechnicalEvaluationPage: React.FC = () => {
           ].map((item) => (
             <label
               key={item.key}
-              className="p-4 rounded-lg border border-slate-200 bg-slate-50/70 flex items-start gap-3 cursor-pointer"
+              className="p-4 rounded-xl border border-[#C5A267]/35 bg-[#F5F0E6]/65 flex items-start gap-3 cursor-pointer"
             >
               <input
                 type="checkbox"
@@ -499,12 +498,12 @@ export const TechnicalEvaluationPage: React.FC = () => {
                     [item.key]: e.target.checked,
                   }));
                 }}
-                className="mt-1 w-4 h-4 accent-[#087F78]"
+                className="mt-1 w-5 h-5 accent-[#087F68]"
               />
               <div className="space-y-1">
-                <div className="font-bold text-[#102137]">{item.title}</div>
-                <div className="text-[11px] font-mono text-[#087F78]">{item.type}</div>
-                <p className="text-xs text-slate-600">{item.detail}</p>
+                <div className="font-bold text-[#101B2D]">{item.title}</div>
+                <div className="text-xs font-mono text-[#087F68] font-semibold">{item.type}</div>
+                <p className="text-sm text-[#334155]">{item.detail}</p>
               </div>
             </label>
           ))}

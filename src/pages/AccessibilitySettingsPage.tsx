@@ -73,14 +73,14 @@ export const AccessibilitySettingsPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-2">
-        <div className="text-xs font-mono uppercase text-[#087F78] font-bold">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-2.5">
+        <div className="text-sm font-mono uppercase tracking-wider text-[#087F68] font-bold">
           First-Class Accessibility · Voice &amp; Text Parity · Bilingual Support
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#102137]">
+        <h1 className="text-[32px] sm:text-[38px] font-bold text-[#101B2D] leading-tight">
           Accessibility, Voice, and Language Settings
         </h1>
-        <p className="text-sm text-slate-600">
+        <p className="text-[16px] sm:text-[17px] text-[#334155]">
           Tailored for Lakshmi Devi (Age 72, low vision and hearing loss). Every voice action has a full keyboard and text alternative.
         </p>
       </section>
@@ -88,15 +88,15 @@ export const AccessibilitySettingsPage: React.FC = () => {
       {/* Grid of Visual & Cognitive Controls */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 1. Text Enlargement */}
-        <div className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-          <div className="flex items-center gap-2 text-base font-bold text-[#102137]">
-            <Type className="w-5 h-5 text-[#087F78]" />
+        <div className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+          <div className="flex items-center gap-2.5 text-[20px] font-bold text-[#101B2D]">
+            <Type className="w-5 h-5 text-[#087F68]" />
             <h2>1. Text Size &amp; Typography Scale</h2>
           </div>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-[16px] text-[#334155]">
             Enlarges all headings, body text, and interactive targets across the entire application while keeping layouts readable.
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             {(
               [
                 { id: 'normal', label: 'Standard (100%)' },
@@ -108,10 +108,10 @@ export const AccessibilitySettingsPage: React.FC = () => {
                 key={opt.id}
                 type="button"
                 onClick={() => updateAccessibility({ textSize: opt.id })}
-                className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold border transition-colors ${
+                className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-semibold border transition-colors ${
                   accessibility.textSize === opt.id
-                    ? 'bg-[#087F78] text-white border-[#087F78]'
-                    : 'bg-slate-50 text-[#102137] border-slate-300 hover:bg-slate-100'
+                    ? 'bg-[#087F68] text-white border-[#087F68]'
+                    : 'bg-[#F5F0E6] text-[#101B2D] border-[#C5A267]/50 hover:bg-[#EAE3D5]'
                 }`}
                 aria-pressed={accessibility.textSize === opt.id}
               >
@@ -122,24 +122,24 @@ export const AccessibilitySettingsPage: React.FC = () => {
         </div>
 
         {/* 2. High Contrast & Reduced Motion */}
-        <div className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-          <div className="flex items-center gap-2 text-base font-bold text-[#102137]">
-            <Eye className="w-5 h-5 text-[#087F78]" />
+        <div className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+          <div className="flex items-center gap-2.5 text-[20px] font-bold text-[#101B2D]">
+            <Eye className="w-5 h-5 text-[#087F68]" />
             <h2>2. High Contrast, Reduced Motion &amp; Focus Mode</h2>
           </div>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-[16px] text-[#334155]">
             Strengthens border contrast to crisp black-on-white, disables non-essential motion, or simplifies the dashboard to one task at a time.
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             <button
               type="button"
               onClick={() =>
                 updateAccessibility({ highContrast: !accessibility.highContrast })
               }
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold border ${
+              className={`px-4 py-2.5 rounded-lg text-sm font-semibold border ${
                 accessibility.highContrast
-                  ? 'bg-[#102137] text-white border-[#102137]'
-                  : 'bg-slate-50 text-[#102137] border-slate-300'
+                  ? 'bg-[#101B2D] text-white border-[#101B2D]'
+                  : 'bg-[#F5F0E6] text-[#101B2D] border-[#C5A267]/50'
               }`}
               aria-pressed={accessibility.highContrast}
             >
@@ -151,10 +151,10 @@ export const AccessibilitySettingsPage: React.FC = () => {
               onClick={() =>
                 updateAccessibility({ reducedMotion: !accessibility.reducedMotion })
               }
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold border ${
+              className={`px-4 py-2.5 rounded-lg text-sm font-semibold border ${
                 accessibility.reducedMotion
-                  ? 'bg-[#102137] text-white border-[#102137]'
-                  : 'bg-slate-50 text-[#102137] border-slate-300'
+                  ? 'bg-[#101B2D] text-white border-[#101B2D]'
+                  : 'bg-[#F5F0E6] text-[#101B2D] border-[#C5A267]/50'
               }`}
               aria-pressed={accessibility.reducedMotion}
             >
@@ -166,10 +166,10 @@ export const AccessibilitySettingsPage: React.FC = () => {
               onClick={() =>
                 updateAccessibility({ oneTaskAtATime: !accessibility.oneTaskAtATime })
               }
-              className={`px-3.5 py-2 rounded-lg text-xs font-semibold border ${
+              className={`px-4 py-2.5 rounded-lg text-sm font-semibold border ${
                 accessibility.oneTaskAtATime
-                  ? 'bg-[#087F78] text-white border-[#087F78]'
-                  : 'bg-slate-50 text-[#102137] border-slate-300'
+                  ? 'bg-[#087F68] text-white border-[#087F68]'
+                  : 'bg-[#F5F0E6] text-[#101B2D] border-[#C5A267]/50'
               }`}
               aria-pressed={accessibility.oneTaskAtATime}
             >
@@ -179,22 +179,22 @@ export const AccessibilitySettingsPage: React.FC = () => {
         </div>
 
         {/* 3. Language Selection (English & Telugu) */}
-        <div className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-          <div className="flex items-center gap-2 text-base font-bold text-[#102137]">
-            <Globe className="w-5 h-5 text-[#087F78]" />
+        <div className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+          <div className="flex items-center gap-2.5 text-[20px] font-bold text-[#101B2D]">
+            <Globe className="w-5 h-5 text-[#087F68]" />
             <h2>3. Language Selection (English &amp; తెలుగు)</h2>
           </div>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-[16px] text-[#334155]">
             Switches actual navigation items, headers, dashboard guidance, offline recovery prompts, and safeguard messages between English and Telugu.
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => setLanguage('en')}
-              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold border ${
+              className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-semibold border ${
                 accessibility.language === 'en'
-                  ? 'bg-[#087F78] text-white border-[#087F78]'
-                  : 'bg-slate-50 text-[#102137] border-slate-300'
+                  ? 'bg-[#087F68] text-white border-[#087F68]'
+                  : 'bg-[#F5F0E6] text-[#101B2D] border-[#C5A267]/50'
               }`}
             >
               English (Default)
@@ -202,10 +202,10 @@ export const AccessibilitySettingsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setLanguage('te')}
-              className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold border ${
+              className={`px-4 py-2.5 rounded-lg text-sm sm:text-base font-semibold border ${
                 accessibility.language === 'te'
-                  ? 'bg-[#087F78] text-white border-[#087F78]'
-                  : 'bg-slate-50 text-[#102137] border-slate-300'
+                  ? 'bg-[#087F68] text-white border-[#087F68]'
+                  : 'bg-[#F5F0E6] text-[#101B2D] border-[#C5A267]/50'
               }`}
             >
               తెలుగు (Telugu Demonstration Interface)
@@ -214,24 +214,24 @@ export const AccessibilitySettingsPage: React.FC = () => {
         </div>
 
         {/* 4. Read-Aloud & Pause/Resume Spoken Read-Back */}
-        <div className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-base font-bold text-[#102137]">
-              <Volume2 className="w-5 h-5 text-[#087F78]" />
+        <div className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 text-[20px] font-bold text-[#101B2D]">
+              <Volume2 className="w-5 h-5 text-[#087F68]" />
               <h2>4. Spoken Read-Aloud &amp; Task Resumption</h2>
             </div>
-            <span className="text-xs font-mono text-slate-500">
+            <span className="text-xs font-mono text-[#334155]">
               Speech API: {isSpeechSynthesisSupported() ? 'Available' : 'Transcript Fallback'}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-[16px] text-[#334155]">
             Pause and resume your verification task at any time. Upon resumption, SEVA SUTRA reads back your exact last confirmed step.
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             <button
               type="button"
               onClick={() => speakText(t.dashboardIntro)}
-              className="px-3.5 py-2 rounded-lg bg-[#087F78] text-white text-xs font-semibold inline-flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-lg bg-[#087F68] hover:bg-[#066552] text-white text-sm font-semibold inline-flex items-center gap-2"
             >
               <Volume2 className="w-4 h-4" />
               <span>Read Intro Aloud</span>
@@ -240,7 +240,7 @@ export const AccessibilitySettingsPage: React.FC = () => {
             <button
               type="button"
               onClick={stopSpeech}
-              className="px-3.5 py-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-[#102137] inline-flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-lg border border-[#C5A267]/50 bg-white text-sm font-semibold text-[#101B2D] inline-flex items-center gap-2"
             >
               <VolumeX className="w-4 h-4" />
               <span>Stop Speech</span>
@@ -249,16 +249,16 @@ export const AccessibilitySettingsPage: React.FC = () => {
             <button
               type="button"
               onClick={handlePauseResumeTask}
-              className="px-3.5 py-2 rounded-lg bg-[#102137] text-white text-xs font-semibold inline-flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-lg bg-[#101B2D] text-white text-sm font-semibold inline-flex items-center gap-2"
             >
               {taskPaused ? (
                 <>
-                  <PlayCircle className="w-4 h-4 text-[#E0F4EF]" />
+                  <PlayCircle className="w-4 h-4 text-[#C5A267]" />
                   <span>Resume Task &amp; Speak State Read-Back</span>
                 </>
               ) : (
                 <>
-                  <PauseCircle className="w-4 h-4 text-[#E0F4EF]" />
+                  <PauseCircle className="w-4 h-4 text-[#C5A267]" />
                   <span>Pause Current Task</span>
                 </>
               )}
@@ -268,18 +268,18 @@ export const AccessibilitySettingsPage: React.FC = () => {
       </section>
 
       {/* Voice Input + Full Text Alternatives */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-              <Mic className="w-5 h-5 text-[#087F78]" />
+            <h2 className="text-[22px] sm:text-[26px] font-bold text-[#101B2D] flex items-center gap-2.5">
+              <Mic className="w-6 h-6 text-[#087F68]" />
               <span>Voice Navigation &amp; Mandatory Text Alternatives</span>
             </h2>
-            <p className="text-xs text-slate-600">
+            <p className="text-[15px] text-[#334155]">
               Voice input is never the only way to complete a task. Use the microphone button, type a command, or click any one-tap text button.
             </p>
           </div>
-          <span className="text-xs font-mono text-slate-500">
+          <span className="text-sm font-mono text-[#334155]">
             SpeechRecognition: {isSpeechRecognitionSupported() ? 'Supported' : 'Graceful Text Fallback'}
           </span>
         </div>
@@ -293,7 +293,7 @@ export const AccessibilitySettingsPage: React.FC = () => {
                 (statusMsg) => setVoiceInputStatus(statusMsg)
               )
             }
-            className="px-4 py-2.5 rounded-lg bg-[#087F78] hover:bg-[#066963] text-white text-xs sm:text-sm font-semibold inline-flex items-center justify-center gap-2 shrink-0"
+            className="px-5 py-2.5 rounded-lg bg-[#087F68] hover:bg-[#066552] text-white text-sm sm:text-base font-semibold inline-flex items-center justify-center gap-2 shrink-0"
           >
             <Mic className="w-4 h-4" />
             <span>Start Voice Input</span>
@@ -306,7 +306,7 @@ export const AccessibilitySettingsPage: React.FC = () => {
                 executeCommandText(voiceCommandText);
               }
             }}
-            className="flex-1 flex gap-2"
+            className="flex-1 flex gap-2.5"
           >
             <label htmlFor="text-cmd-input" className="sr-only">
               Type a command (Text alternative to voice input)
@@ -317,11 +317,11 @@ export const AccessibilitySettingsPage: React.FC = () => {
               value={voiceCommandText}
               onChange={(e) => setVoiceCommandText(e.target.value)}
               placeholder='Type command (e.g., "check payment delay" or "read status")'
-              className="flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white text-sm"
+              className="flex-1 px-3.5 py-2.5 rounded-lg border border-[#C5A267]/50 bg-white text-base text-[#101B2D]"
             />
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-[#102137] text-white text-xs sm:text-sm font-semibold shrink-0"
+              className="px-5 py-2.5 rounded-lg bg-[#101B2D] text-white text-sm sm:text-base font-semibold shrink-0"
             >
               Run Text Command
             </button>
@@ -329,8 +329,8 @@ export const AccessibilitySettingsPage: React.FC = () => {
         </div>
 
         {/* One-tap text alternatives */}
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span className="text-xs font-semibold text-slate-500">
+        <div className="flex flex-wrap items-center gap-2.5 pt-1">
+          <span className="text-sm font-bold text-[#334155]">
             One-Tap Text Alternatives:
           </span>
           {[
@@ -343,27 +343,27 @@ export const AccessibilitySettingsPage: React.FC = () => {
               key={phrase}
               type="button"
               onClick={() => executeCommandText(phrase)}
-              className="px-3 py-1.5 rounded-md border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-[#102137]"
+              className="px-3.5 py-1.5 rounded-lg border border-[#C5A267]/45 bg-[#F5F0E6] hover:bg-[#EAE3D5] text-sm font-semibold text-[#101B2D]"
             >
               “{phrase}”
             </button>
           ))}
         </div>
 
-        <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700">
+        <div className="p-3.5 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 text-sm sm:text-base text-[#101B2D]">
           <strong>Assistant Status:</strong> {voiceInputStatus}
         </div>
       </section>
 
       {/* Offline Connectivity Recovery Controls */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-3">
-        <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-          <Sliders className="w-5 h-5 text-[#087F78]" />
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
+        <h2 className="text-[22px] sm:text-[26px] font-bold text-[#101B2D] flex items-center gap-2.5">
+          <Sliders className="w-6 h-6 text-[#087F68]" />
           <span>Repeatable Offline Connectivity Stress-Test Control</span>
         </h2>
-        <p className="text-xs sm:text-sm text-slate-600">
+        <p className="text-[16px] text-[#334155]">
           Current Status:{' '}
-          <strong>
+          <strong className="text-[#101B2D]">
             {isOfflineSimulated
               ? 'Offline Mode Active (Saved locally — not submitted)'
               : 'Online — Local Draft Synchronized in IndexedDB'}
@@ -375,7 +375,7 @@ export const AccessibilitySettingsPage: React.FC = () => {
             type="button"
             onClick={simulateConnectivityLoss}
             disabled={isOfflineSimulated}
-            className="px-4 py-2 rounded-lg bg-[#C44848] text-white text-xs sm:text-sm font-semibold disabled:opacity-40 inline-flex items-center gap-2"
+            className="px-5 py-2.5 rounded-lg bg-[#B42332] text-white text-sm sm:text-base font-semibold disabled:opacity-40 inline-flex items-center gap-2"
           >
             <WifiOff className="w-4 h-4" />
             <span>Simulate Connectivity Loss</span>
@@ -384,7 +384,7 @@ export const AccessibilitySettingsPage: React.FC = () => {
             type="button"
             onClick={restoreConnectivity}
             disabled={!isOfflineSimulated}
-            className="px-4 py-2 rounded-lg bg-[#087F78] text-white text-xs sm:text-sm font-semibold disabled:opacity-40 inline-flex items-center gap-2"
+            className="px-5 py-2.5 rounded-lg bg-[#087F68] text-white text-sm sm:text-base font-semibold disabled:opacity-40 inline-flex items-center gap-2"
           >
             <Wifi className="w-4 h-4" />
             <span>Restore Connection &amp; Trigger Spoken Read-Back</span>

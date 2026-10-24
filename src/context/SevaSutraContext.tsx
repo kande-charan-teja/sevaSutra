@@ -105,6 +105,9 @@ interface SevaSutraContextValue extends PersistedDemoState {
   simulateConnectivityLoss: () => void;
   restoreConnectivity: () => void;
   updateOfflineDraftStep: (stepId: string, stepLabel: string, notes?: string) => void;
+  continueFromOfflineDraft: () => void;
+  repeatLastOfflineDraftStep: () => void;
+  launchEvaluatorScenario: (scenarioNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7) => void;
   saveFieldVisitRequest: (update: Partial<FieldVisitRequest>, finalize: boolean) => void;
   updateSensitiveReport: (update: Partial<SensitiveReportState>) => void;
   setEligibilityInput: React.Dispatch<React.SetStateAction<EligibilityApplicantInput>>;
@@ -732,6 +735,78 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLastActionFeedback(`Saved locally — not submitted: "${stepLabel}"`);
   };
 
+  const continueFromOfflineDraft = () => {
+    const ts = nowStamp();
+    setState((prev) => {
+      const nextStepId = !prev.offlineDraft.completedStepIds.includes('verif-step-3')
+        ? 'verif-step-3'
+        : 'verif-step-4';
+      const nextStepLabel =
+        nextStepId === 'verif-step-3'
+          ? 'Select preferred verification method (Doorstep visit or Citizen Centre)'
+          : 'Review post-merger bank branch IFSC slip (Account stays in Lakshmi Devi’s name)';
+      const updatedIds = prev.offlineDraft.completedStepIds.includes(nextStepId)
+        ? prev.offlineDraft.completedStepIds
+        : [...prev.offlineDraft.completedStepIds, nextStepId];
+      const nextDraft: OfflineDraft = {
+        ...prev.offlineDraft,
+        savedAt: ts,
+        lastConfirmedStep: nextStepLabel,
+        completedStepIds: updatedIds,
+        reconnectedReadBackPending: false,
+      };
+      void saveOfflineDraftToIndexedDB(nextDraft);
+      return {
+        ...prev,
+        activePage: 'documents-deadlines',
+        offlineDraft: nextDraft,
+        auditEvents: [
+          {
+            id: `aud-draft-continue-${Date.now()}`,
+            timestamp: ts,
+            actor: 'Lakshmi Devi (Beneficiary)',
+            action: `Resumed verification task after reconnection; continued to "${nextStepLabel}" (Not officially submitted)`,
+            outcome: 'Recorded locally',
+            source: 'Offline Recovery Engine',
+            riskClassification: 'Standard',
+          },
+          ...prev.auditEvents,
+        ],
+      };
+    });
+    setLastActionFeedback(
+      'Continued from saved local draft. Reminder: Your verification has not been officially submitted.'
+    );
+  };
+
+  const repeatLastOfflineDraftStep = () => {
+    const ts = nowStamp();
+    const msg = `Repeating last confirmed step: "${state.offlineDraft.lastConfirmedStep}". Your verification has not been officially submitted.`;
+    speakText(msg);
+    setState((prev) => ({
+      ...prev,
+      activePage: 'documents-deadlines',
+      offlineDraft: {
+        ...prev.offlineDraft,
+        savedAt: ts,
+        reconnectedReadBackPending: false,
+      },
+      auditEvents: [
+        {
+          id: `aud-draft-repeat-${Date.now()}`,
+          timestamp: ts,
+          actor: 'Lakshmi Devi (Beneficiary)',
+          action: `Repeated last confirmed step "${prev.offlineDraft.lastConfirmedStep}" after reconnection`,
+          outcome: 'Recorded locally',
+          source: 'Offline Recovery Engine',
+          riskClassification: 'Standard',
+        },
+        ...prev.auditEvents,
+      ],
+    }));
+    setLastActionFeedback(msg);
+  };
+
   const saveFieldVisitRequest = (update: Partial<FieldVisitRequest>, finalize: boolean) => {
     const ts = nowStamp();
     setState((prev) => {
@@ -871,6 +946,114 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
   };
 
+  const launchEvaluatorScenario = (scenarioNumber: 1 | 2 | 3 | 4 | 5 | 6 | 7) => {
+    if (scenarioNumber === 1) {
+      setState((prev) => ({
+        ...prev,
+        guidedDemoActive: true,
+        guidedDemoStep: 1,
+        activePage: 'overview',
+      }));
+      setLastActionFeedback(
+        'Evaluator Scenario 1: Reviewing Lakshmi Devi’s four independent benefit states (Verification due in 12 days, Payment 3 months delayed).'
+      );
+    } else if (scenarioNumber === 2) {
+      setState((prev) => ({
+        ...prev,
+        guidedDemoActive: true,
+        guidedDemoStep: 3,
+        activePage: 'payment-diagnosis',
+        diagnosticScenarioId: 'primary_lakshmi',
+      }));
+      setLastActionFeedback(
+        'Evaluator Scenario 2: Running deterministic Payment Diagnosis on post-merger IFSC return.'
+      );
+    } else if (scenarioNumber === 3) {
+      const ts = nowStamp();
+      // Ensure permissions are granted first so the unsafe bank-change simulation triggers the 72-hour cooling-off
+      const activePerms = state.permissions.map((p) => ({ ...p, status: 'Granted' as const }));
+      const sim = simulateUnsafeBankAccountChangeRequest(activePerms, ts);
+      setState((prev) => ({
+        ...prev,
+        guidedDemoActive: true,
+        guidedDemoStep: 6,
+        activePage: 'caregiver-access',
+        permissions: activePerms,
+        highRiskRequest: sim.highRiskRequest,
+        trustedContact: {
+          ...prev.trustedContact,
+          notifiedOnHighRisk: true,
+          lastNotifiedAt: ts,
+        },
+        auditEvents: [...sim.auditEventsToAdd, ...prev.auditEvents],
+        notifications: [...sim.notificationsToAdd, ...prev.notifications],
+      }));
+      setLastActionFeedback(
+        'Evaluator Scenario 3: Triggered caregiver bank-change attempt -> Blocked & entered 72-hour cooling-off.'
+      );
+    } else if (scenarioNumber === 4) {
+      const ts = nowStamp();
+      const baseHighRisk =
+        state.highRiskRequest.status === 'None'
+          ? simulateUnsafeBankAccountChangeRequest(
+              state.permissions.map((p) => ({ ...p, status: 'Granted' as const })),
+              ts
+            ).highRiskRequest
+          : state.highRiskRequest;
+      const res = revokeAllCaregiverAccessAndQuarantine(state.permissions, baseHighRisk, ts);
+      setState((prev) => ({
+        ...prev,
+        guidedDemoActive: true,
+        guidedDemoStep: 8,
+        activePage: 'caregiver-access',
+        permissions: res.updatedPermissions,
+        highRiskRequest: res.updatedHighRisk,
+        auditEvents: [...res.auditEvents, ...prev.auditEvents],
+        notifications: [res.notification, ...prev.notifications],
+      }));
+      setLastActionFeedback(
+        'Evaluator Scenario 4: Revoked caregiver access while bank-change was pending -> Request Quarantined & Cancelled.'
+      );
+    } else if (scenarioNumber === 5) {
+      setState((prev) => ({
+        ...prev,
+        guidedDemoActive: true,
+        guidedDemoStep: 11,
+        activePage: 'documents-deadlines',
+      }));
+      if (!state.isOfflineSimulated) {
+        simulateConnectivityLoss();
+      } else {
+        restoreConnectivity();
+      }
+    } else if (scenarioNumber === 6) {
+      setState((prev) => ({
+        ...prev,
+        guidedDemoActive: true,
+        guidedDemoStep: 10,
+        activePage: 'explore-benefits',
+      }));
+      setLastActionFeedback(
+        'Evaluator Scenario 6: Exploring benefit eligibility using transparent synthetic decision rules.'
+      );
+    } else if (scenarioNumber === 7) {
+      setState((prev) => ({
+        ...prev,
+        guidedDemoActive: true,
+        guidedDemoStep: 12,
+        activePage: 'assisted-completion',
+      }));
+      saveFieldVisitRequest(
+        {
+          preferredDate: '2026-10-30',
+          preferredTimeWindow: 'Morning (09:00 - 12:00)',
+          contactMethod: 'Doorstep Officer Knock',
+        },
+        true
+      );
+    }
+  };
+
   const closeGuidedWalkthrough = () => {
     setState((prev) => ({ ...prev, guidedDemoActive: false }));
   };
@@ -915,6 +1098,9 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         simulateConnectivityLoss,
         restoreConnectivity,
         updateOfflineDraftStep,
+        continueFromOfflineDraft,
+        repeatLastOfflineDraftStep,
+        launchEvaluatorScenario,
         saveFieldVisitRequest,
         updateSensitiveReport,
         setEligibilityInput,

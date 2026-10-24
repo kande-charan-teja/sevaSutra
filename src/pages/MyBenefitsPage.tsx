@@ -4,7 +4,6 @@ import {
   ArrowRight,
   CheckCircle2,
   GitBranch,
-  HelpCircle,
   Layers,
   ShieldCheck,
 } from 'lucide-react';
@@ -79,20 +78,20 @@ export const MyBenefitsPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-2">
+      <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 sm:p-7 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#102137]">
+            <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-[#101B2D]">
               My Benefits — Four Linked but Independent State Machines
             </h1>
-            <p className="text-sm text-slate-600">
+            <p className="text-base text-slate-700">
               Application, Identity Verification, Renewal, and Payment are tracked independently. Changing one process never overwrites or corrupts another.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setActivePage('payment-diagnosis')}
-            className="px-4 py-2 rounded-lg bg-[#087F78] text-white text-sm font-semibold hover:bg-[#066963] inline-flex items-center gap-2 shrink-0"
+            className="px-4 py-2.5 rounded-lg bg-[#087F68] text-white text-sm font-bold hover:bg-[#066552] inline-flex items-center gap-2 shrink-0"
           >
             <span>Open Payment Diagnosis</span>
             <ArrowRight className="w-4 h-4" />
@@ -102,51 +101,51 @@ export const MyBenefitsPage: React.FC = () => {
         {transitionFeedback && (
           <div
             role="status"
-            className={`mt-4 p-3.5 rounded-lg border text-sm flex items-center gap-2.5 ${
+            className={`mt-4 p-4 rounded-xl border text-sm sm:text-base flex items-center gap-2.5 ${
               transitionFeedback.success
-                ? 'bg-[#E0F4EF] border-[#087F78] text-[#102137]'
-                : 'bg-red-50 border-[#C44848] text-[#C44848]'
+                ? 'bg-[#F5F0E6] border-[#087F68] text-[#101B2D]'
+                : 'bg-red-50 border-[#B42332] text-[#B42332]'
             }`}
           >
             {transitionFeedback.success ? (
-              <CheckCircle2 className="w-4 h-4 text-[#087F78] shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-[#087F68] shrink-0" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-[#C44848] shrink-0" />
+              <AlertCircle className="w-5 h-5 text-[#B42332] shrink-0" />
             )}
-            <span className="font-medium">{transitionFeedback.message}</span>
+            <span className="font-bold">{transitionFeedback.message}</span>
           </div>
         )}
       </section>
 
-      {/* Visual Diagram of 4 Independent Lanes + Dotted Hypothesis Links */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-            <Layers className="w-5 h-5 text-[#087F78]" />
+      {/* Interactive State Machine Controller */}
+      <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 sm:p-7 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h2 className="font-display text-2xl font-bold text-[#101B2D] flex items-center gap-2">
+            <Layers className="w-5 h-5 text-[#087F68]" />
             <span>Interactive State Machine Controller &amp; Transition Validator</span>
           </h2>
-          <span className="text-xs font-mono text-slate-500">
+          <span className="text-xs sm:text-sm font-mono text-slate-600">
             Click any state below to test valid vs. rejected transitions
           </span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* 1. Application State Machine */}
-          <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+          <div className="p-5 rounded-xl border border-[#E2D9C8] bg-[#F5F0E6]/60 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold uppercase text-slate-500">
+                <span className="text-xs font-bold uppercase text-slate-600">
                   Process 1 · Application
                 </span>
-                <h3 className="text-lg font-bold text-[#087F78]">
+                <h3 className="font-display text-xl font-bold text-[#087F68]">
                   Current: {stateMachines.application}
                 </h3>
               </div>
-              <span className="text-xs font-mono text-slate-500 tabular-nums">
+              <span className="text-xs font-mono text-slate-600 tabular-nums">
                 Updated: {stateMachines.lastUpdated.application}
               </span>
             </div>
-            <p className="text-xs text-slate-600">
+            <p className="text-sm text-slate-700">
               Valid path: Draft → Submitted → Under review → Approved or Rejected. An Approved application cannot be arbitrarily reverted to Draft.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
@@ -160,12 +159,12 @@ export const MyBenefitsPage: React.FC = () => {
                     key={st}
                     type="button"
                     onClick={() => handleTransitionClick('application', st)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border transition-colors ${
                       isCurrent
-                        ? 'bg-[#087F78] text-white border-[#087F78]'
+                        ? 'bg-[#087F68] text-white border-[#087F68]'
                         : isValidNext
-                          ? 'bg-white text-[#102137] border-[#087F78] hover:bg-[#E0F4EF]'
-                          : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-[#C44848]'
+                          ? 'bg-white text-[#101B2D] border-[#087F68] hover:bg-[#F5F0E6]'
+                          : 'bg-white/70 text-slate-600 border-[#E2D9C8] hover:border-[#B42332]'
                     }`}
                   >
                     {st} {isCurrent ? '(Current)' : isValidNext ? '(Valid Next)' : '(Test Invalid)'}
@@ -176,21 +175,21 @@ export const MyBenefitsPage: React.FC = () => {
           </div>
 
           {/* 2. Verification State Machine */}
-          <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+          <div className="p-5 rounded-xl border border-[#E2D9C8] bg-[#F5F0E6]/60 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold uppercase text-slate-500">
+                <span className="text-xs font-bold uppercase text-slate-600">
                   Process 2 · Identity Verification
                 </span>
-                <h3 className="text-lg font-bold text-[#102137]">
+                <h3 className="font-display text-xl font-bold text-[#101B2D]">
                   Current: {stateMachines.verification} (Due in 12 days)
                 </h3>
               </div>
-              <span className="text-xs font-mono text-slate-500 tabular-nums">
+              <span className="text-xs font-mono text-slate-600 tabular-nums">
                 Updated: {stateMachines.lastUpdated.verification}
               </span>
             </div>
-            <p className="text-xs text-slate-600">
+            <p className="text-sm text-slate-700">
               Valid path: Not started → Due soon → In progress → Verified (with separate states for Action required or Expired).
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
@@ -204,12 +203,12 @@ export const MyBenefitsPage: React.FC = () => {
                     key={st}
                     type="button"
                     onClick={() => handleTransitionClick('verification', st)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border transition-colors ${
                       isCurrent
-                        ? 'bg-[#102137] text-white border-[#102137]'
+                        ? 'bg-[#101B2D] text-white border-[#101B2D]'
                         : isValidNext
-                          ? 'bg-white text-[#102137] border-[#087F78] hover:bg-[#E0F4EF]'
-                          : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-[#C44848]'
+                          ? 'bg-white text-[#101B2D] border-[#087F68] hover:bg-[#F5F0E6]'
+                          : 'bg-white/70 text-slate-600 border-[#E2D9C8] hover:border-[#B42332]'
                     }`}
                   >
                     {st} {isCurrent ? '(Current)' : isValidNext ? '(Valid Next)' : '(Test Invalid)'}
@@ -220,21 +219,21 @@ export const MyBenefitsPage: React.FC = () => {
           </div>
 
           {/* 3. Renewal State Machine */}
-          <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+          <div className="p-5 rounded-xl border border-[#E2D9C8] bg-[#F5F0E6]/60 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold uppercase text-slate-500">
+                <span className="text-xs font-bold uppercase text-slate-600">
                   Process 3 · Benefit Renewal
                 </span>
-                <h3 className="text-lg font-bold text-[#102137]">
+                <h3 className="font-display text-xl font-bold text-[#101B2D]">
                   Current: {stateMachines.renewal}
                 </h3>
               </div>
-              <span className="text-xs font-mono text-slate-500 tabular-nums">
+              <span className="text-xs font-mono text-slate-600 tabular-nums">
                 Updated: {stateMachines.lastUpdated.renewal}
               </span>
             </div>
-            <p className="text-xs text-slate-600">
+            <p className="text-sm text-slate-700">
               Valid path: Not due → Due soon → Submitted → Renewed or Overdue.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
@@ -246,12 +245,12 @@ export const MyBenefitsPage: React.FC = () => {
                     key={st}
                     type="button"
                     onClick={() => handleTransitionClick('renewal', st)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border transition-colors ${
                       isCurrent
-                        ? 'bg-[#102137] text-white border-[#102137]'
+                        ? 'bg-[#101B2D] text-white border-[#101B2D]'
                         : isValidNext
-                          ? 'bg-white text-[#102137] border-[#087F78] hover:bg-[#E0F4EF]'
-                          : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-[#C44848]'
+                          ? 'bg-white text-[#101B2D] border-[#087F68] hover:bg-[#F5F0E6]'
+                          : 'bg-white/70 text-slate-600 border-[#E2D9C8] hover:border-[#B42332]'
                     }`}
                   >
                     {st} {isCurrent ? '(Current)' : isValidNext ? '(Valid Next)' : '(Test Invalid)'}
@@ -262,21 +261,21 @@ export const MyBenefitsPage: React.FC = () => {
           </div>
 
           {/* 4. Payment State Machine */}
-          <div className="p-5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+          <div className="p-5 rounded-xl border border-[#E2D9C8] bg-[#F5F0E6]/60 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold uppercase text-slate-500">
+                <span className="text-xs font-bold uppercase text-slate-600">
                   Process 4 · Monthly Payment
                 </span>
-                <h3 className="text-lg font-bold text-[#C44848]">
+                <h3 className="font-display text-xl font-bold text-[#B42332]">
                   Current: {stateMachines.payment}
                 </h3>
               </div>
-              <span className="text-xs font-mono text-slate-500 tabular-nums">
+              <span className="text-xs font-mono text-slate-600 tabular-nums">
                 Updated: {stateMachines.lastUpdated.payment}
               </span>
             </div>
-            <p className="text-xs text-slate-600">
+            <p className="text-sm text-slate-700">
               Valid path: Scheduled → Processing → Credited, with branches for Delayed and Under investigation.
             </p>
             <div className="flex flex-wrap gap-2 pt-1">
@@ -288,12 +287,12 @@ export const MyBenefitsPage: React.FC = () => {
                     key={st}
                     type="button"
                     onClick={() => handleTransitionClick('payment', st)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
+                    className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold border transition-colors ${
                       isCurrent
-                        ? 'bg-[#C44848] text-white border-[#C44848]'
+                        ? 'bg-[#B42332] text-white border-[#B42332]'
                         : isValidNext
-                          ? 'bg-white text-[#102137] border-[#087F78] hover:bg-[#E0F4EF]'
-                          : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-[#C44848]'
+                          ? 'bg-white text-[#101B2D] border-[#087F68] hover:bg-[#F5F0E6]'
+                          : 'bg-white/70 text-slate-600 border-[#E2D9C8] hover:border-[#B42332]'
                     }`}
                   >
                     {st} {isCurrent ? '(Current)' : isValidNext ? '(Valid Next)' : '(Test Invalid)'}
@@ -306,16 +305,16 @@ export const MyBenefitsPage: React.FC = () => {
       </section>
 
       {/* Cross-Process Hypotheses Section */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-5">
+      <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 sm:p-7 space-y-5">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase text-[#087F78] font-bold">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase text-[#087F68] font-bold">
             <GitBranch className="w-4 h-4" />
             <span>{t.mayAffectHypothesis}</span>
           </div>
-          <h2 className="text-xl font-bold text-[#102137]">
+          <h2 className="font-display text-2xl font-bold text-[#101B2D]">
             Cross-Process Relationships (Evaluated as Hypotheses, Never Automatic Conclusions)
           </h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-base text-slate-700">
             Each cross-process link records observed state, supporting evidence, potential relationship, confidence classification, missing information, and recommended investigation.
           </p>
         </div>
@@ -324,50 +323,50 @@ export const MyBenefitsPage: React.FC = () => {
           {hypotheses.map((hyp) => (
             <div
               key={hyp.id}
-              className="p-5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3"
+              className="p-5 rounded-xl border border-[#C5A267] bg-[#F5F0E6]/50 space-y-3"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                <div className="flex items-center gap-2 text-sm font-bold text-[#102137]">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2D9C8] pb-3">
+                <div className="flex items-center gap-2 text-base font-bold text-[#101B2D]">
                   <span>{hyp.fromProcess}</span>
-                  <span className="font-mono text-xs text-[#087F78]">
+                  <span className="font-mono text-xs text-[#087F68]">
                     --- ({t.mayAffectHypothesis}) ---&gt;
                   </span>
                   <span>{hyp.toProcess}</span>
                 </div>
-                <span className="text-xs font-semibold text-[#087F78]">
+                <span className="text-xs sm:text-sm font-bold text-[#087F68]">
                   Confidence: {hyp.confidenceClassification}
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div className="space-y-1">
-                  <div className="font-semibold text-slate-500 text-xs">1. Observed State</div>
-                  <p className="text-[#102137] font-medium">{hyp.observedState}</p>
+                  <div className="font-bold text-slate-600 text-xs uppercase">1. Observed State</div>
+                  <p className="text-[#101B2D] font-semibold">{hyp.observedState}</p>
                 </div>
                 <div className="space-y-1">
-                  <div className="font-semibold text-slate-500 text-xs">2. Supporting Evidence</div>
-                  <p className="text-slate-700">{hyp.supportingEvidence}</p>
+                  <div className="font-bold text-slate-600 text-xs uppercase">2. Supporting Evidence</div>
+                  <p className="text-slate-800">{hyp.supportingEvidence}</p>
                 </div>
                 <div className="space-y-1">
-                  <div className="font-semibold text-slate-500 text-xs">
+                  <div className="font-bold text-slate-600 text-xs uppercase">
                     3. Potential Relationship (Hypothesis)
                   </div>
-                  <p className="text-slate-700">{hyp.potentialRelationship}</p>
+                  <p className="text-slate-800">{hyp.potentialRelationship}</p>
                 </div>
                 <div className="space-y-1">
-                  <div className="font-semibold text-slate-500 text-xs">
+                  <div className="font-bold text-slate-600 text-xs uppercase">
                     4. Information Still Missing
                   </div>
-                  <p className="text-slate-700">{hyp.informationStillMissing}</p>
+                  <p className="text-slate-800">{hyp.informationStillMissing}</p>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <div className="text-[#102137]">
+              <div className="pt-2 border-t border-[#E2D9C8] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+                <div className="text-[#101B2D]">
                   <strong>Recommended Investigation: </strong>
                   <span>{hyp.recommendedInvestigation}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[#087F78] font-semibold shrink-0">
+                <div className="flex items-center gap-1.5 text-[#087F68] font-bold shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                   <span>State Isolation Verified</span>
                 </div>

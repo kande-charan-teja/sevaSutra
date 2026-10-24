@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   AlertTriangle,
+  ArrowLeft,
   CheckCircle2,
   ClipboardCheck,
   FileQuestion,
@@ -20,12 +21,12 @@ import { DiagnosticScenarioId } from '../types/models';
 
 const SCENARIO_LIST: Array<{ id: DiagnosticScenarioId; shortLabel: string }> = [
   { id: 'primary_lakshmi', shortLabel: 'Primary Demo: Lakshmi Devi (Due in 12d + Merged IFSC)' },
-  { id: 'account_mismatch', shortLabel: 'Cause 1: Account Mismatch' },
-  { id: 'closed_bank_account', shortLabel: 'Cause 2: Closed Bank Account' },
-  { id: 'lapsed_verification', shortLabel: 'Cause 3: Lapsed Verification (Separate Test)' },
-  { id: 'funding_release_delay', shortLabel: 'Cause 4: Funding-Release Delay' },
-  { id: 'wrong_branch_code', shortLabel: 'Cause 5: Wrong Bank-Branch Code' },
-  { id: 'incomplete_evidence', shortLabel: 'Outcome 6: Incomplete Evidence' },
+  { id: 'account_mismatch', shortLabel: '1. Account Mismatch' },
+  { id: 'closed_bank_account', shortLabel: '2. Closed Bank Account' },
+  { id: 'lapsed_verification', shortLabel: '3. Lapsed Identity Verification' },
+  { id: 'funding_release_delay', shortLabel: '4. Funding-Release Delay' },
+  { id: 'wrong_branch_code', shortLabel: '5. Wrong Bank-Branch Code' },
+  { id: 'incomplete_evidence', shortLabel: '6. Insufficient Evidence' },
 ];
 
 export const PaymentDiagnosisPage: React.FC = () => {
@@ -61,21 +62,30 @@ export const PaymentDiagnosisPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header & Deterministic Engine Guarantee */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 sm:p-7 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="text-xs font-mono uppercase text-[#087F78] font-bold">
-              Deterministic Rule-Based Diagnostic Engine · Zero LLM Hallucination
+            <div className="text-xs font-mono uppercase text-[#087F68] font-bold">
+              Deterministic Rule-Based Diagnostic Engine · Transparent TypeScript Rules
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#102137]">
+            <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-[#101B2D]">
               Payment-Delay Diagnosis Engine
             </h1>
-            <p className="text-sm text-slate-600">
-              Inspects synthetic pension, verification, bank KYC, and treasury batch records to explain what was checked, what evidence was found, and what remains unknown.
+            <p className="text-base text-slate-700">
+              Inspects synthetic pension, verification, bank KYC, and treasury batch records to explain checks performed, evidence found, what remains unknown, and safe next actions.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setActivePage('overview')}
+              className="px-4 py-2.5 rounded-lg border border-[#C5A267] bg-[#F5F0E6] hover:bg-[#ebe3d3] text-[#101B2D] text-sm font-bold inline-flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Return to Dashboard</span>
+            </button>
+
             <button
               type="button"
               onClick={() =>
@@ -83,7 +93,7 @@ export const PaymentDiagnosisPage: React.FC = () => {
                   `${diagnosis.title}. Certainty classification: ${diagnosis.certaintyClassification}. ${diagnosis.possibleOrRecordedCause} Recommended next step: ${diagnosis.recommendedCorrection}`
                 )
               }
-              className="px-3.5 py-2 rounded-lg bg-[#087F78] text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-lg bg-[#087F68] hover:bg-[#066552] text-white text-sm font-bold inline-flex items-center gap-1.5"
             >
               <Volume2 className="w-4 h-4" />
               <span>Read Diagnosis Aloud</span>
@@ -92,9 +102,9 @@ export const PaymentDiagnosisPage: React.FC = () => {
         </div>
 
         {/* Scenario Selector Tabs */}
-        <div className="pt-2 border-t border-slate-100 space-y-2">
-          <div className="text-xs font-semibold text-slate-600">
-            Select a Seeded Diagnostic Case to Inspect Rules (Judges can test all 5 required causes + incomplete evidence):
+        <div className="pt-3 border-t border-[#E2D9C8] space-y-2.5">
+          <div className="text-sm font-bold text-[#101B2D]">
+            Select a Diagnostic Case and Run Evaluation (Supports all 6 required cases + Lakshmi Devi’s seeded record):
           </div>
           <div className="flex flex-wrap gap-2">
             {SCENARIO_LIST.map((sc) => {
@@ -108,10 +118,10 @@ export const PaymentDiagnosisPage: React.FC = () => {
                     setStepMarkedComplete(false);
                     setEnquirySheetOpen(false);
                   }}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                  className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold border transition-colors ${
                     active
-                      ? 'bg-[#102137] text-white border-[#102137]'
-                      : 'bg-slate-50 text-[#102137] border-slate-200 hover:bg-slate-100'
+                      ? 'bg-[#101B2D] text-white border-[#101B2D]'
+                      : 'bg-[#F5F0E6] text-[#101B2D] border-[#C5A267]/60 hover:bg-[#ebe3d3]'
                   }`}
                 >
                   {sc.shortLabel}
@@ -125,26 +135,26 @@ export const PaymentDiagnosisPage: React.FC = () => {
       {/* Prominent Result Card */}
       <section
         aria-labelledby="diagnosis-result-heading"
-        className="seva-card bg-white rounded-xl border-2 border-[#087F78] p-6 space-y-5"
+        className="seva-card bg-[#FFFFFF] rounded-xl border-2 border-[#087F68] p-6 sm:p-7 space-y-5"
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E2D9C8] pb-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#087F78]">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#087F68]">
               <Stethoscope className="w-4 h-4" />
-              <span>OUTCOME CLASSIFICATION: {diagnosis.certaintyClassification.toUpperCase()}</span>
+              <span>CERTAINTY CLASSIFICATION: {diagnosis.certaintyClassification.toUpperCase()}</span>
               <span aria-hidden="true">·</span>
-              <span className="font-mono text-slate-500">Evaluated: {rerunTimestamp}</span>
+              <span className="font-mono text-slate-600">Evaluated: {rerunTimestamp}</span>
             </div>
             <h2
               id="diagnosis-result-heading"
-              className="text-xl sm:text-2xl font-bold text-[#102137]"
+              className="font-display text-2xl sm:text-3xl font-extrabold text-[#101B2D]"
             >
               {diagnosis.title}
             </h2>
           </div>
 
-          <div className="text-xs font-semibold px-3 py-1.5 rounded-md bg-[#E0F4EF] text-[#102137] shrink-0">
-            Responsible for next step: <strong>{diagnosis.responsibleParty}</strong>
+          <div className="text-sm font-bold px-3.5 py-2 rounded-lg bg-[#F5F0E6] border border-[#C5A267] text-[#101B2D] shrink-0">
+            Responsible party: <strong>{diagnosis.responsibleParty}</strong>
           </div>
         </div>
 
@@ -152,7 +162,7 @@ export const PaymentDiagnosisPage: React.FC = () => {
         {diagnosis.specificBannerMessage && (
           <div
             role="alert"
-            className="p-4 rounded-lg bg-amber-50 border border-amber-400 text-[#102137] font-semibold text-sm sm:text-base"
+            className="p-4 rounded-xl bg-[#F5F0E6] border-2 border-[#C5A267] text-[#101B2D] font-bold text-base"
           >
             “{diagnosis.specificBannerMessage}”
           </div>
@@ -160,46 +170,46 @@ export const PaymentDiagnosisPage: React.FC = () => {
 
         {/* Primary Scenario Safeguard Note */}
         {diagnosticScenarioId === 'primary_lakshmi' && (
-          <div className="p-3.5 rounded-lg bg-[#E0F4EF]/70 border border-[#087F78]/30 text-xs sm:text-sm text-[#102137]">
-            <strong>Important Distinction:</strong> In Lakshmi Devi’s primary scenario, Identity Verification is <strong>Due in 12 days</strong> (not expired). Therefore, the engine rules out expired verification as the cause of the past 3-month delay and pinpoints the post-merger branch IFSC code return (<code className="font-mono">NEFT_RETURN_ERR_IFSC_MERGED_404</code>).
+          <div className="p-4 rounded-xl bg-[#F5F0E6] border border-[#C5A267] text-sm sm:text-base text-[#101B2D]">
+            <strong>Important Distinction:</strong> In Lakshmi Devi’s primary scenario, Identity Verification is <strong>Due in 12 days</strong> (not expired). Therefore, the engine does not blame upcoming verification for payments delayed 3 months ago, and instead identifies the recorded post-merger branch IFSC code problem (<code className="font-mono font-bold">NEFT_RETURN_ERR_IFSC_MERGED_404</code>).
           </div>
         )}
 
         {/* Three-Column Evidence Breakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* 1. What the system checked */}
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
-            <h3 className="text-sm font-bold text-[#102137] flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#087F78]" />
-              <span>What the System Checked</span>
+          {/* 1. Checks Performed */}
+          <div className="p-5 rounded-xl bg-[#F5F0E6]/60 border border-[#E2D9C8] space-y-2.5">
+            <h3 className="text-base font-bold text-[#101B2D] flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-[#087F68]" />
+              <span>Checks Performed</span>
             </h3>
-            <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 list-disc pl-4">
+            <ul className="space-y-2 text-sm text-slate-800 list-disc pl-4">
               {diagnosis.whatSystemChecked.map((item, idx) => (
                 <li key={idx}>{item}</li>
               ))}
             </ul>
           </div>
 
-          {/* 2. Evidence found in synthetic record */}
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
-            <h3 className="text-sm font-bold text-[#102137] flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
-              <span>Evidence Found in Synthetic Record</span>
+          {/* 2. Evidence Found */}
+          <div className="p-5 rounded-xl bg-[#F5F0E6]/60 border border-[#E2D9C8] space-y-2.5">
+            <h3 className="text-base font-bold text-[#101B2D] flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-[#C5A267]" />
+              <span>Evidence Found in Record</span>
             </h3>
-            <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 list-disc pl-4">
+            <ul className="space-y-2 text-sm text-slate-800 list-disc pl-4">
               {diagnosis.evidenceFound.map((item, idx) => (
                 <li key={idx}>{item}</li>
               ))}
             </ul>
           </div>
 
-          {/* 3. What remains unknown */}
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
-            <h3 className="text-sm font-bold text-[#102137] flex items-center gap-1.5">
-              <HelpCircle className="w-4 h-4 text-[#C44848]" />
+          {/* 3. What Remains Unknown */}
+          <div className="p-5 rounded-xl bg-[#F5F0E6]/60 border border-[#E2D9C8] space-y-2.5">
+            <h3 className="text-base font-bold text-[#101B2D] flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-[#B42332]" />
               <span>What Remains Unknown</span>
             </h3>
-            <ul className="space-y-1.5 text-xs sm:text-sm text-slate-700 list-disc pl-4">
+            <ul className="space-y-2 text-sm text-slate-800 list-disc pl-4">
               {diagnosis.whatRemainsUnknown.map((item, idx) => (
                 <li key={idx}>{item}</li>
               ))}
@@ -207,42 +217,42 @@ export const PaymentDiagnosisPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Cause, Recommended Correction & Escalation Path */}
+        {/* Cause, Recommended Action & Escalation Route */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div className="p-4 rounded-lg border border-slate-200 bg-white space-y-1">
-            <div className="text-xs font-bold uppercase text-slate-500">
+          <div className="p-4 rounded-xl border border-[#E2D9C8] bg-white space-y-1.5">
+            <div className="text-xs font-bold uppercase text-slate-600">
               Possible or Recorded Cause
             </div>
-            <p className="text-sm text-[#102137] font-medium">
+            <p className="text-sm sm:text-base text-[#101B2D] font-medium">
               {diagnosis.possibleOrRecordedCause}
             </p>
           </div>
 
-          <div className="p-4 rounded-lg border border-slate-200 bg-white space-y-1">
-            <div className="text-xs font-bold uppercase text-slate-500">
-              Recommended Correction
+          <div className="p-4 rounded-xl border border-[#E2D9C8] bg-white space-y-1.5">
+            <div className="text-xs font-bold uppercase text-slate-600">
+              Recommended Action
             </div>
-            <p className="text-sm text-[#102137] font-medium">
+            <p className="text-sm sm:text-base text-[#101B2D] font-medium">
               {diagnosis.recommendedCorrection}
             </p>
           </div>
 
-          <div className="p-4 rounded-lg border border-slate-200 bg-white space-y-1">
-            <div className="text-xs font-bold uppercase text-slate-500">
-              Relevant Escalation Path
+          <div className="p-4 rounded-xl border border-[#E2D9C8] bg-white space-y-1.5">
+            <div className="text-xs font-bold uppercase text-slate-600">
+              Escalation Route
             </div>
-            <p className="text-sm text-[#102137] font-medium">
+            <p className="text-sm sm:text-base text-[#101B2D] font-medium">
               {diagnosis.escalationPath}
             </p>
           </div>
         </div>
 
-        {/* 5 Mandatory Working Action Buttons */}
-        <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center gap-3">
+        {/* Working Action Controls */}
+        <div className="pt-4 border-t border-[#E2D9C8] flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={handleAddToChecklist}
-            className="px-4 py-2 rounded-lg bg-[#087F78] hover:bg-[#066963] text-white text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-colors"
+            className="px-4 py-2.5 rounded-lg bg-[#087F68] hover:bg-[#066552] text-white text-sm font-bold inline-flex items-center gap-2 transition-colors"
           >
             <ListPlus className="w-4 h-4" />
             <span>Add to my checklist</span>
@@ -251,20 +261,20 @@ export const PaymentDiagnosisPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setStepMarkedComplete(!stepMarkedComplete)}
-            className={`px-4 py-2 rounded-lg border text-xs sm:text-sm font-semibold inline-flex items-center gap-2 transition-colors ${
+            className={`px-4 py-2.5 rounded-lg border text-sm font-bold inline-flex items-center gap-2 transition-colors ${
               stepMarkedComplete
-                ? 'bg-[#E0F4EF] border-[#087F78] text-[#102137]'
-                : 'bg-white border-slate-300 text-[#102137] hover:bg-slate-50'
+                ? 'bg-[#087F68] border-[#087F68] text-white'
+                : 'bg-[#F5F0E6] border-[#C5A267] text-[#101B2D] hover:bg-[#ebe3d3]'
             }`}
           >
-            <ClipboardCheck className="w-4 h-4 text-[#087F78]" />
+            <ClipboardCheck className="w-4 h-4" />
             <span>{stepMarkedComplete ? 'Step Marked Complete ✓' : 'Mark step complete'}</span>
           </button>
 
           <button
             type="button"
             onClick={handleRerunDiagnosis}
-            className="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-[#102137] text-xs sm:text-sm font-semibold inline-flex items-center gap-2"
+            className="px-4 py-2.5 rounded-lg border border-[#C5A267] bg-[#F5F0E6] hover:bg-[#ebe3d3] text-[#101B2D] text-sm font-bold inline-flex items-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Re-run diagnosis</span>
@@ -273,7 +283,7 @@ export const PaymentDiagnosisPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setEnquirySheetOpen(!enquirySheetOpen)}
-            className="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-[#102137] text-xs sm:text-sm font-semibold inline-flex items-center gap-2"
+            className="px-4 py-2.5 rounded-lg border border-[#C5A267] bg-[#F5F0E6] hover:bg-[#ebe3d3] text-[#101B2D] text-sm font-bold inline-flex items-center gap-2"
           >
             <FileQuestion className="w-4 h-4" />
             <span>Prepare an enquiry</span>
@@ -282,48 +292,57 @@ export const PaymentDiagnosisPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActivePage('my-benefits')}
-            className="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-[#102137] text-xs sm:text-sm font-semibold inline-flex items-center gap-2"
+            className="px-4 py-2.5 rounded-lg border border-[#C5A267] bg-white hover:bg-[#F5F0E6] text-[#101B2D] text-sm font-bold inline-flex items-center gap-2"
           >
             <Layers className="w-4 h-4" />
             <span>View benefit status</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActivePage('overview')}
+            className="px-4 py-2.5 rounded-lg bg-[#101B2D] hover:bg-slate-800 text-white text-sm font-bold inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Dashboard</span>
           </button>
         </div>
 
         {/* Enquiry Sheet Drawer when "Prepare an enquiry" is clicked */}
         {enquirySheetOpen && (
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-300 space-y-2 text-xs sm:text-sm">
+          <div className="p-5 rounded-xl bg-[#F5F0E6] border-2 border-[#C5A267] space-y-2.5 text-sm">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-[#102137]">
+              <h3 className="font-bold text-[#101B2D] text-base">
                 Prepared Citizen Service Desk Enquiry Summary (Local Draft — Not Officially Submitted)
               </h3>
               <button
                 type="button"
                 onClick={() => setEnquirySheetOpen(false)}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                className="text-xs font-bold text-slate-700 hover:text-[#101B2D]"
               >
                 Close
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs bg-white p-3 rounded border border-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs bg-white p-3.5 rounded-lg border border-[#E2D9C8]">
               <div>Beneficiary: Lakshmi Devi (Sanction #SSP-2021-88412)</div>
               <div>Diagnostic Scenario: {diagnosis.title}</div>
               <div>Event Code: {currentInput.lastPaymentEventCode}</div>
               <div>Certainty: {diagnosis.certaintyClassification}</div>
             </div>
-            <p className="text-slate-700">
-              <strong>Enquiry Statement for Welfare Officer:</strong> “My pension application is Approved, and my payments have been delayed for {currentInput.paymentMonthsLate} months. Please verify event code <code className="font-mono">{currentInput.lastPaymentEventCode}</code> and advise on: {diagnosis.recommendedCorrection}”
+            <p className="text-[#101B2D]">
+              <strong>Enquiry Statement for Welfare Officer:</strong> “My pension application is Approved, and my payments have been delayed for {currentInput.paymentMonthsLate} months. Please verify event code <code className="font-mono font-bold">{currentInput.lastPaymentEventCode}</code> and advise on: {diagnosis.recommendedCorrection}”
             </p>
           </div>
         )}
       </section>
 
       {/* Interactive 6-Step Decision Tree Visualization */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 sm:p-7 space-y-4">
         <div className="space-y-1">
-          <h2 className="text-lg font-bold text-[#102137]">
+          <h2 className="font-display text-2xl font-bold text-[#101B2D]">
             Interactive Diagnostic Decision Tree
           </h2>
-          <p className="text-xs text-slate-600">
+          <p className="text-sm text-slate-700">
             Start → Inspect available records → Check verification and document status → Check available account information → Review available payment events → Identify possible cause → Recommend next steps.
           </p>
         </div>
@@ -334,21 +353,21 @@ export const PaymentDiagnosisPage: React.FC = () => {
               key={node.stepNumber}
               className={`p-4 rounded-xl border space-y-2 ${
                 node.status === 'flagged'
-                  ? 'bg-red-50/50 border-[#C44848]'
+                  ? 'bg-red-50/40 border-[#B42332]'
                   : node.status === 'uncertain'
-                    ? 'bg-amber-50/60 border-amber-400'
-                    : 'bg-[#E0F4EF]/40 border-[#087F78]/40'
+                    ? 'bg-[#F5F0E6] border-[#C5A267]'
+                    : 'bg-white border-[#087F68]'
               }`}
             >
               <div className="flex items-center justify-between text-xs font-bold">
-                <span className="font-mono text-[#102137]">STEP {node.stepNumber}</span>
+                <span className="font-mono text-[#101B2D]">STEP {node.stepNumber}</span>
                 <span
                   className={
                     node.status === 'flagged'
-                      ? 'text-[#C44848]'
+                      ? 'text-[#B42332]'
                       : node.status === 'uncertain'
-                        ? 'text-amber-800'
-                        : 'text-[#087F78]'
+                        ? 'text-[#101B2D]'
+                        : 'text-[#087F68]'
                   }
                 >
                   {node.status === 'flagged'
@@ -358,9 +377,9 @@ export const PaymentDiagnosisPage: React.FC = () => {
                       : 'Verified'}
                 </span>
               </div>
-              <div className="text-sm font-bold text-[#102137]">{node.label}</div>
-              <div className="text-xs text-slate-600 italic">{node.question}</div>
-              <p className="text-xs sm:text-sm text-[#102137] font-medium pt-1 border-t border-slate-200/70">
+              <div className="text-base font-bold text-[#101B2D]">{node.label}</div>
+              <div className="text-xs sm:text-sm text-slate-600 italic">{node.question}</div>
+              <p className="text-sm text-[#101B2D] font-semibold pt-2 border-t border-[#E2D9C8]">
                 {node.finding}
               </p>
             </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  AlertCircle,
   CheckCircle2,
   Compass,
   HelpCircle,
@@ -49,67 +48,67 @@ export const ExploreBenefitsPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header & Honest Disclaimer */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="text-xs font-mono uppercase text-[#087F78] font-bold">
+          <div className="space-y-1.5">
+            <div className="text-sm font-mono uppercase tracking-wider text-[#087F68] font-bold">
               Illustrative Scheme Discovery · Transparent Rule Evaluation
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#102137]">
+            <h1 className="text-[32px] sm:text-[38px] font-bold text-[#101B2D] leading-tight">
               Explore Benefits — Interactive Decision Tree
             </h1>
-            <p className="text-sm text-slate-600">
+            <p className="text-[16px] sm:text-[17px] text-[#334155]">
               Evaluates illustrative scheme records against editable household parameters and displays three transparent outcomes: <strong>Eligible</strong>, <strong>Not eligible</strong>, or <strong>Needs confirmation</strong>.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
               type="button"
               onClick={() => applyPresetScenario('lakshmi_default')}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#102137] inline-flex items-center gap-1.5"
+              className="px-4 py-2 rounded-lg border border-[#C5A267]/50 bg-[#F5F0E6] hover:bg-[#EAE3D5] text-sm font-semibold text-[#101B2D] inline-flex items-center gap-2"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-4 h-4" />
               <span>Lakshmi Devi Default</span>
             </button>
             <button
               type="button"
               onClick={() => applyPresetScenario('all_confirmed')}
-              className="px-3 py-1.5 rounded-lg bg-[#087F78] text-white text-xs font-semibold hover:bg-[#066963]"
+              className="px-4 py-2 rounded-lg bg-[#087F68] text-white text-sm font-semibold hover:bg-[#066552]"
             >
               Preset: Confirmed Eligible
             </button>
             <button
               type="button"
               onClick={() => applyPresetScenario('high_income')}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#102137]"
+              className="px-4 py-2 rounded-lg border border-[#C5A267]/50 bg-white hover:bg-[#F5F0E6] text-sm font-semibold text-[#101B2D]"
             >
               Preset: Not Eligible
             </button>
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-amber-50 border border-amber-300 text-xs text-[#102137]">
+        <div className="p-4 rounded-xl bg-[#F5F0E6] border border-[#C5A267]/50 text-sm sm:text-base text-[#101B2D]">
           <strong>Important Honesty Notice:</strong> These schemes use clearly labelled illustrative synthetic eligibility rules for demonstration. They do not claim binding eligibility for a live government program without official verification by a Welfare Officer.
         </div>
       </section>
 
       {/* Editable Visual Decision Tree Inputs */}
-      <section className="seva-card bg-white rounded-xl border border-slate-200 p-6 space-y-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#102137] flex items-center gap-2">
-            <Compass className="w-5 h-5 text-[#087F78]" />
+      <section className="seva-card bg-white rounded-xl border border-[#C5A267]/35 p-6 sm:p-7 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h2 className="text-[22px] sm:text-[26px] font-bold text-[#101B2D] flex items-center gap-2.5">
+            <Compass className="w-6 h-6 text-[#087F68]" />
             <span>Editable Applicant Parameters (Decision Tree Inputs)</span>
           </h2>
-          <span className="text-xs text-slate-500">
+          <span className="text-sm text-[#334155]">
             Adjust any field below to see live updates across all 3 scheme outcomes
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Age */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-            <label htmlFor="elig-age" className="block text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 space-y-2">
+            <label htmlFor="elig-age" className="block text-sm font-bold text-[#101B2D]">
               1. Applicant Age (Years)
             </label>
             <input
@@ -124,13 +123,13 @@ export const ExploreBenefitsPage: React.FC = () => {
                   age: Number(e.target.value) || 0,
                 }))
               }
-              className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-sm font-mono tabular-nums"
+              className="w-full px-3.5 py-2 rounded-lg border border-[#C5A267]/50 bg-white text-base font-mono tabular-nums text-[#101B2D]"
             />
           </div>
 
           {/* Monthly Income */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-            <label htmlFor="elig-income" className="block text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 space-y-2">
+            <label htmlFor="elig-income" className="block text-sm font-bold text-[#101B2D]">
               2. Monthly Household Income (₹)
             </label>
             <input
@@ -145,13 +144,13 @@ export const ExploreBenefitsPage: React.FC = () => {
                   monthlyHouseholdIncomeINR: Number(e.target.value) || 0,
                 }))
               }
-              className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-sm font-mono tabular-nums"
+              className="w-full px-3.5 py-2 rounded-lg border border-[#C5A267]/50 bg-white text-base font-mono tabular-nums text-[#101B2D]"
             />
           </div>
 
           {/* Disability % */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-            <label htmlFor="elig-disab-pct" className="block text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 space-y-2">
+            <label htmlFor="elig-disab-pct" className="block text-sm font-bold text-[#101B2D]">
               3. Assessed Disability Percentage (%)
             </label>
             <input
@@ -166,13 +165,13 @@ export const ExploreBenefitsPage: React.FC = () => {
                   disabilityPercentage: Number(e.target.value) || 0,
                 }))
               }
-              className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-sm font-mono tabular-nums"
+              className="w-full px-3.5 py-2 rounded-lg border border-[#C5A267]/50 bg-white text-base font-mono tabular-nums text-[#101B2D]"
             />
           </div>
 
           {/* Marital status */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-            <label htmlFor="elig-marital" className="block text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 space-y-2">
+            <label htmlFor="elig-marital" className="block text-sm font-bold text-[#101B2D]">
               4. Marital / Survivor Status
             </label>
             <select
@@ -184,7 +183,7 @@ export const ExploreBenefitsPage: React.FC = () => {
                   maritalStatus: e.target.value as EligibilityApplicantInput['maritalStatus'],
                 }))
               }
-              className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-sm"
+              className="w-full px-3.5 py-2 rounded-lg border border-[#C5A267]/50 bg-white text-base text-[#101B2D]"
             >
               <option value="Widowed">Widowed</option>
               <option value="Single / Unmarried">Single / Unmarried</option>
@@ -193,8 +192,8 @@ export const ExploreBenefitsPage: React.FC = () => {
           </div>
 
           {/* Disability Certificate Confirmed */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
-            <label htmlFor="elig-cert" className="text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 flex items-center justify-between gap-2">
+            <label htmlFor="elig-cert" className="text-sm font-bold text-[#101B2D]">
               5. Valid Medical Certificate On File?
             </label>
             <input
@@ -207,13 +206,13 @@ export const ExploreBenefitsPage: React.FC = () => {
                   hasDisabilityCertificate: e.target.checked,
                 }))
               }
-              className="w-4 h-4 accent-[#087F78]"
+              className="w-5 h-5 accent-[#087F68]"
             />
           </div>
 
           {/* Residency Years */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-            <label htmlFor="elig-res-yrs" className="block text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 space-y-2">
+            <label htmlFor="elig-res-yrs" className="block text-sm font-bold text-[#101B2D]">
               6. State Residency Duration (Years)
             </label>
             <input
@@ -228,13 +227,13 @@ export const ExploreBenefitsPage: React.FC = () => {
                   residencyYearsInState: Number(e.target.value) || 0,
                 }))
               }
-              className="w-full px-3 py-1.5 rounded border border-slate-300 bg-white text-sm font-mono tabular-nums"
+              className="w-full px-3.5 py-2 rounded-lg border border-[#C5A267]/50 bg-white text-base font-mono tabular-nums text-[#101B2D]"
             />
           </div>
 
           {/* Residency Document Available */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
-            <label htmlFor="elig-res-doc" className="text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 flex items-center justify-between gap-2">
+            <label htmlFor="elig-res-doc" className="text-sm font-bold text-[#101B2D]">
               7. Residency Proof Verified?
             </label>
             <input
@@ -247,13 +246,13 @@ export const ExploreBenefitsPage: React.FC = () => {
                   residencyDocumentAvailable: e.target.checked,
                 }))
               }
-              className="w-4 h-4 accent-[#087F78]"
+              className="w-5 h-5 accent-[#087F68]"
             />
           </div>
 
           {/* Receives Another Primary Pension */}
-          <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
-            <label htmlFor="elig-other-pen" className="text-xs font-bold text-[#102137]">
+          <div className="p-4 rounded-xl bg-[#F5F0E6]/75 border border-[#C5A267]/40 flex items-center justify-between gap-2">
+            <label htmlFor="elig-other-pen" className="text-sm font-bold text-[#101B2D]">
               8. Already Receives Primary State Pension?
             </label>
             <input
@@ -266,51 +265,51 @@ export const ExploreBenefitsPage: React.FC = () => {
                   receivesAnotherStatePension: e.target.checked,
                 }))
               }
-              className="w-4 h-4 accent-[#087F78]"
+              className="w-5 h-5 accent-[#087F68]"
             />
           </div>
         </div>
       </section>
 
       {/* Three Scheme Evaluation Cards */}
-      <section className="space-y-5">
+      <section className="space-y-6">
         {evaluations.map((scheme) => (
           <div
             key={scheme.schemeId}
-            className={`seva-card bg-white rounded-xl border-2 p-6 space-y-4 ${
+            className={`seva-card bg-white rounded-xl border-2 p-6 sm:p-7 space-y-5 ${
               scheme.outcome === 'Eligible'
-                ? 'border-[#087F78]'
+                ? 'border-[#087F68]'
                 : scheme.outcome === 'Needs confirmation'
-                  ? 'border-amber-400'
-                  : 'border-slate-300'
+                  ? 'border-[#C5A267]'
+                  : 'border-[#C5A267]/35'
             }`}
           >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-bold">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#C5A267]/25 pb-4">
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2.5 text-sm font-bold">
                   {scheme.outcome === 'Eligible' ? (
-                    <span className="text-[#087F78] inline-flex items-center gap-1">
+                    <span className="text-[#087F68] inline-flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4" />
                       OUTCOME: ELIGIBLE (IN ILLUSTRATIVE MODEL)
                     </span>
                   ) : scheme.outcome === 'Needs confirmation' ? (
-                    <span className="text-amber-700 inline-flex items-center gap-1">
+                    <span className="text-[#8B6914] inline-flex items-center gap-1.5">
                       <HelpCircle className="w-4 h-4" />
                       OUTCOME: NEEDS CONFIRMATION
                     </span>
                   ) : (
-                    <span className="text-[#C44848] inline-flex items-center gap-1">
+                    <span className="text-[#B42332] inline-flex items-center gap-1.5">
                       <XCircle className="w-4 h-4" />
                       OUTCOME: NOT ELIGIBLE
                     </span>
                   )}
                   <span aria-hidden="true">·</span>
-                  <span className="font-mono tabular-nums text-slate-600">
+                  <span className="font-mono tabular-nums text-[#101B2D] font-bold">
                     ₹{scheme.monthlyBenefitINR.toLocaleString('en-IN')} / month
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-[#102137]">{scheme.schemeName}</h3>
-                <p className="text-xs sm:text-sm text-slate-600">{scheme.description}</p>
+                <h3 className="text-[20px] sm:text-[22px] font-bold text-[#101B2D]">{scheme.schemeName}</h3>
+                <p className="text-[16px] text-[#334155]">{scheme.description}</p>
               </div>
 
               <button
@@ -320,33 +319,41 @@ export const ExploreBenefitsPage: React.FC = () => {
                     `${scheme.schemeName}. Outcome: ${scheme.outcome}. Recommended next step: ${scheme.recommendedNextStep}`
                   )
                 }
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-[#102137] hover:bg-slate-50 inline-flex items-center gap-1.5 shrink-0"
+                className="px-4 py-2 rounded-lg border border-[#C5A267]/50 bg-[#F5F0E6] text-sm font-semibold text-[#101B2D] hover:bg-[#EAE3D5] inline-flex items-center gap-2 shrink-0"
               >
-                <Volume2 className="w-3.5 h-3.5 text-[#087F78]" />
+                <Volume2 className="w-4 h-4 text-[#087F68]" />
                 <span>Read Explanation</span>
               </button>
             </div>
 
             {/* Visual Decision Tree Nodes for this Scheme */}
-            <div className="space-y-2">
-              <div className="text-xs font-bold uppercase text-slate-500">
+            <div className="space-y-3">
+              <div className="text-sm font-bold uppercase tracking-wider text-[#334155]">
                 Visual Rule-Check Decision Tree (Which Criteria Were Checked)
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {scheme.criteriaChecked.map((crit) => (
                   <div
                     key={crit.criterionId}
-                    className={`p-3 rounded-lg border text-xs space-y-1 ${
+                    className={`p-4 rounded-xl border text-sm space-y-1.5 ${
                       crit.status === 'matched'
-                        ? 'bg-[#E0F4EF]/50 border-[#087F78]/40'
+                        ? 'bg-[#087F68]/10 border-[#087F68]/40'
                         : crit.status === 'missing_info'
-                          ? 'bg-amber-50 border-amber-400'
-                          : 'bg-red-50/50 border-[#C44848]/50'
+                          ? 'bg-[#C5A267]/15 border-[#C5A267]'
+                          : 'bg-[#B42332]/10 border-[#B42332]/40'
                     }`}
                   >
-                    <div className="flex items-center justify-between font-bold text-[#102137]">
+                    <div className="flex items-center justify-between font-bold text-[#101B2D]">
                       <span>{crit.label}</span>
-                      <span>
+                      <span
+                        className={
+                          crit.status === 'matched'
+                            ? 'text-[#087F68]'
+                            : crit.status === 'missing_info'
+                              ? 'text-[#8B6914]'
+                              : 'text-[#B42332]'
+                        }
+                      >
                         {crit.status === 'matched'
                           ? 'Matched ✓'
                           : crit.status === 'missing_info'
@@ -354,57 +361,59 @@ export const ExploreBenefitsPage: React.FC = () => {
                             : 'Did Not Match ✕'}
                       </span>
                     </div>
-                    <div className="text-slate-600">{crit.ruleDescription}</div>
-                    <div className="font-mono text-[#102137]">Your value: {crit.userValue}</div>
+                    <div className="text-[#334155]">{crit.ruleDescription}</div>
+                    <div className="font-mono text-[#101B2D] font-semibold">
+                      Your value: {crit.userValue}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* 4-Column Breakdown of Matched, Unmatched, Missing, & Official Confirmation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                <div className="font-bold text-[#087F78]">Criteria Matched</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 text-sm">
+              <div className="p-4 rounded-xl bg-[#F5F0E6]/70 border border-[#C5A267]/35 space-y-1.5">
+                <div className="font-bold text-[#087F68]">Criteria Matched</div>
                 {scheme.matchedCriteria.length > 0 ? (
-                  <ul className="list-disc pl-4 space-y-1 text-slate-700">
+                  <ul className="list-disc pl-4 space-y-1 text-[#334155]">
                     {scheme.matchedCriteria.map((m, i) => (
                       <li key={i}>{m}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-slate-500">None</p>
+                  <p className="text-[#334155]">None</p>
                 )}
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                <div className="font-bold text-[#C44848]">Criteria Not Matched</div>
+              <div className="p-4 rounded-xl bg-[#F5F0E6]/70 border border-[#C5A267]/35 space-y-1.5">
+                <div className="font-bold text-[#B42332]">Criteria Not Matched</div>
                 {scheme.unmatchedCriteria.length > 0 ? (
-                  <ul className="list-disc pl-4 space-y-1 text-slate-700">
+                  <ul className="list-disc pl-4 space-y-1 text-[#334155]">
                     {scheme.unmatchedCriteria.map((u, i) => (
                       <li key={i}>{u}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-slate-500">None — all checked rules passed</p>
+                  <p className="text-[#334155]">None — all checked rules passed</p>
                 )}
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                <div className="font-bold text-amber-800">What Information Is Missing</div>
+              <div className="p-4 rounded-xl bg-[#F5F0E6]/70 border border-[#C5A267]/35 space-y-1.5">
+                <div className="font-bold text-[#8B6914]">What Information Is Missing</div>
                 {scheme.missingInformation.length > 0 ? (
-                  <ul className="list-disc pl-4 space-y-1 text-slate-700">
+                  <ul className="list-disc pl-4 space-y-1 text-[#334155]">
                     {scheme.missingInformation.map((mi, i) => (
                       <li key={i}>{mi}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-slate-500">No missing local fields</p>
+                  <p className="text-[#334155]">No missing local fields</p>
                 )}
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                <div className="font-bold text-[#102137]">Requires Official Confirmation</div>
-                <ul className="list-disc pl-4 space-y-1 text-slate-700">
+              <div className="p-4 rounded-xl bg-[#F5F0E6]/70 border border-[#C5A267]/35 space-y-1.5">
+                <div className="font-bold text-[#101B2D]">Requires Official Confirmation</div>
+                <ul className="list-disc pl-4 space-y-1 text-[#334155]">
                   {scheme.factsRequiringOfficialConfirmation.map((f, i) => (
                     <li key={i}>{f}</li>
                   ))}
@@ -412,7 +421,7 @@ export const ExploreBenefitsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 text-xs sm:text-sm text-[#102137]">
+            <div className="pt-3 border-t border-[#C5A267]/25 text-[16px] text-[#101B2D]">
               <strong>What you should do next:</strong> {scheme.recommendedNextStep}
             </div>
           </div>
