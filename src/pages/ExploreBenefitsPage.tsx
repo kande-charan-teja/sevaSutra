@@ -355,10 +355,10 @@ export const ExploreBenefitsPage: React.FC = () => {
                         }
                       >
                         {crit.status === 'matched'
-                          ? 'Matched ✓'
+                          ? 'Matched'
                           : crit.status === 'missing_info'
-                            ? 'Missing Info ?'
-                            : 'Did Not Match ✕'}
+                            ? 'Missing Info'
+                            : 'Did Not Match'}
                       </span>
                     </div>
                     <div className="text-[#334155]">{crit.ruleDescription}</div>

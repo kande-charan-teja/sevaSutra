@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Layers,
   ListPlus,
+  Play,
   RefreshCw,
   Stethoscope,
   Volume2,
@@ -33,21 +34,30 @@ export const PaymentDiagnosisPage: React.FC = () => {
   const {
     diagnosticScenarioId,
     setDiagnosticScenarioId,
+    runDiagnosticEvaluation,
+    markDiagnosticStepComplete,
+    prepareDiagnosisEnquiry,
+    checklist,
     addChecklistItem,
     setActivePage,
     speakText,
   } = useSevaSutra();
 
-  const [stepMarkedComplete, setStepMarkedComplete] = useState(false);
   const [enquirySheetOpen, setEnquirySheetOpen] = useState(false);
+  const [enquiryAccessError, setEnquiryAccessError] = useState<string | null>(null);
   const [rerunTimestamp, setRerunTimestamp] = useState<string>('Just now');
 
   const currentInput = SEEDED_DIAGNOSTIC_SCENARIOS[diagnosticScenarioId];
   const diagnosis = runPaymentDiagnosis(currentInput);
 
+  const matchingChecklistItem = checklist.find(
+    (c) => c.title.toLowerCase() === diagnosis.checklistActionTitle.toLowerCase()
+  );
+  const stepMarkedComplete = Boolean(matchingChecklistItem?.completed);
+
   const handleRerunDiagnosis = () => {
+    runDiagnosticEvaluation(diagnosticScenarioId);
     setRerunTimestamp(new Date().toLocaleTimeString());
-    setStepMarkedComplete(false);
   };
 
   const handleAddToChecklist = () => {
@@ -57,6 +67,25 @@ export const PaymentDiagnosisPage: React.FC = () => {
       'Payment Diagnosis',
       `Payment Diagnosis (${diagnosis.title})`
     );
+  };
+
+  const handleMarkStepComplete = () => {
+    markDiagnosticStepComplete(
+      diagnosis.checklistActionTitle,
+      diagnosis.recommendedCorrection,
+      `Payment Diagnosis (${diagnosis.title})`
+    );
+  };
+
+  const handlePrepareEnquiry = () => {
+    const res = prepareDiagnosisEnquiry(diagnosis.title, currentInput.lastPaymentEventCode);
+    if (!res.allowed) {
+      setEnquiryAccessError(res.message);
+      setEnquirySheetOpen(false);
+    } else {
+      setEnquiryAccessError(null);
+      setEnquirySheetOpen(true);
+    }
   };
 
   return (
@@ -77,6 +106,15 @@ export const PaymentDiagnosisPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={handleRerunDiagnosis}
+              className="px-4 py-2.5 rounded-lg bg-[#101B2D] hover:bg-slate-800 text-white text-sm font-bold inline-flex items-center gap-1.5"
+            >
+              <Play className="w-4 h-4 text-[#C5A267]" />
+              <span>Run diagnosis</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setActivePage('overview')}
@@ -115,8 +153,9 @@ export const PaymentDiagnosisPage: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setDiagnosticScenarioId(sc.id);
-                    setStepMarkedComplete(false);
                     setEnquirySheetOpen(false);
+                    setEnquiryAccessError(null);
+                    setRerunTimestamp(new Date().toLocaleTimeString());
                   }}
                   className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold border transition-colors ${
                     active
@@ -260,7 +299,7 @@ export const PaymentDiagnosisPage: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setStepMarkedComplete(!stepMarkedComplete)}
+            onClick={handleMarkStepComplete}
             className={`px-4 py-2.5 rounded-lg border text-sm font-bold inline-flex items-center gap-2 transition-colors ${
               stepMarkedComplete
                 ? 'bg-[#087F68] border-[#087F68] text-white'
@@ -268,7 +307,7 @@ export const PaymentDiagnosisPage: React.FC = () => {
             }`}
           >
             <ClipboardCheck className="w-4 h-4" />
-            <span>{stepMarkedComplete ? 'Step Marked Complete ✓' : 'Mark step complete'}</span>
+            <span>{stepMarkedComplete ? 'Step Marked Complete' : 'Mark step complete'}</span>
           </button>
 
           <button
@@ -282,7 +321,7 @@ export const PaymentDiagnosisPage: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setEnquirySheetOpen(!enquirySheetOpen)}
+            onClick={handlePrepareEnquiry}
             className="px-4 py-2.5 rounded-lg border border-[#C5A267] bg-[#F5F0E6] hover:bg-[#ebe3d3] text-[#101B2D] text-sm font-bold inline-flex items-center gap-2"
           >
             <FileQuestion className="w-4 h-4" />
@@ -307,6 +346,16 @@ export const PaymentDiagnosisPage: React.FC = () => {
             <span>Return to Dashboard</span>
           </button>
         </div>
+
+        {/* Access Denied Alert if Caregiver Permission 'prepare_enquiry' is Revoked/Expired */}
+        {enquiryAccessError && (
+          <div
+            role="alert"
+            className="p-4 rounded-xl bg-red-50 border border-[#B42332] text-[#B42332] text-sm font-bold"
+          >
+            {enquiryAccessError}
+          </div>
+        )}
 
         {/* Enquiry Sheet Drawer when "Prepare an enquiry" is clicked */}
         {enquirySheetOpen && (

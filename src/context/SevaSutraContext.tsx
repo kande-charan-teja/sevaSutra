@@ -41,12 +41,14 @@ import { transitionBenefitProcess } from '../logic/stateMachines';
 import {
   attemptCaregiverSelfApproval,
   attemptContinueAfterRevocation,
+  checkActionPermission,
   revokeAllCaregiverAccessAndQuarantine,
   simulateUnsafeBankAccountChangeRequest,
 } from '../logic/permissionAndRisk';
 import { DICTIONARIES, TranslationDictionary } from '../i18n/dictionaries';
 import {
   clearLocalStorageState,
+  loadOfflineDraftFromIndexedDB,
   loadStateFromLocalStorage,
   saveOfflineDraftToIndexedDB,
   saveStateToLocalStorage,
@@ -84,11 +86,26 @@ interface SevaSutraContextValue extends PersistedDemoState {
   setActivePage: (page: PageId) => void;
   setActiveRole: (role: UserRole) => void;
   setDiagnosticScenarioId: (id: DiagnosticScenarioId) => void;
+  runDiagnosticEvaluation: (id?: DiagnosticScenarioId) => void;
+  markDiagnosticStepComplete: (title: string, description: string, source: string) => void;
+  prepareDiagnosisEnquiry: (diagnosisTitle: string, eventCode: string) => {
+    allowed: boolean;
+    message: string;
+  };
+  evaluateScopedAction: (
+    scope: PermissionScopeId | 'MODIFY_BANK_ACCOUNT' | 'APPROVE_HIGH_RISK_REQUEST',
+    actionDescription: string
+  ) => { allowed: boolean; reason: string };
   attemptStateMachineTransition: (
     process: 'application' | 'verification' | 'renewal' | 'payment',
     nextState: string
   ) => { success: boolean; message: string };
-  addChecklistItem: (title: string, description: string, category: ChecklistItem['category'], source: string) => void;
+  addChecklistItem: (
+    title: string,
+    description: string,
+    category: ChecklistItem['category'],
+    source: string
+  ) => void;
   toggleChecklistItem: (id: string) => void;
   toggleDocumentReminder: (docId: string) => void;
   changeDocumentReminderChannel: (docId: string, channel: DocumentItem['reminderChannel']) => void;
@@ -102,8 +119,10 @@ interface SevaSutraContextValue extends PersistedDemoState {
   triggerPostRevocationAttempt: () => string;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+  openNotificationRecord: (id: string) => void;
   simulateConnectivityLoss: () => void;
   restoreConnectivity: () => void;
+  saveOfflineDraftExplicitly: (notes?: string) => void;
   updateOfflineDraftStep: (stepId: string, stepLabel: string, notes?: string) => void;
   continueFromOfflineDraft: () => void;
   repeatLastOfflineDraftStep: () => void;
@@ -172,7 +191,12 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Sync accessibility classes onto <html>
   useEffect(() => {
     const html = document.documentElement;
-    html.classList.remove('seva-large-text', 'seva-xlarge-text', 'seva-high-contrast', 'seva-reduced-motion');
+    html.classList.remove(
+      'seva-large-text',
+      'seva-xlarge-text',
+      'seva-high-contrast',
+      'seva-reduced-motion'
+    );
     if (state.accessibility.textSize === 'large') {
       html.classList.add('seva-large-text');
     } else if (state.accessibility.textSize === 'xlarge') {
@@ -187,12 +211,35 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     html.lang = state.accessibility.language;
   }, [state.accessibility]);
 
+  // Recover IndexedDB draft on mount if newer or interrupted
+  useEffect(() => {
+    let mounted = true;
+    void loadOfflineDraftFromIndexedDB(INITIAL_OFFLINE_DRAFT.id).then((idbDraft) => {
+      if (mounted && idbDraft && idbDraft.completedStepIds) {
+        setState((prev) => ({
+          ...prev,
+          offlineDraft: idbDraft,
+        }));
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Persist to localStorage on state changes
   useEffect(() => {
     saveStateToLocalStorage(state);
   }, [state]);
 
   const nowStamp = () => new Date().toISOString().replace('T', ' ').slice(0, 16);
+
+  const getActorLabel = (role: UserRole): AuditEvent['actor'] =>
+    role === 'Beneficiary'
+      ? 'Lakshmi Devi (Beneficiary)'
+      : role === 'Caregiver'
+        ? 'Arjun (Caregiver)'
+        : 'Service Officer (Demo)';
 
   const speakText = (text: string) => {
     setSpokenTranscriptBanner(text);
@@ -218,12 +265,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         {
           id: `aud-role-${Date.now()}`,
           timestamp: ts,
-          actor:
-            role === 'Beneficiary'
-              ? 'Lakshmi Devi (Beneficiary)'
-              : role === 'Caregiver'
-                ? 'Arjun (Caregiver)'
-                : 'Service Officer (Demo)',
+          actor: getActorLabel(role),
           action: `Switched demonstration role view to ${role}`,
           outcome: 'Allowed',
           source: 'Demo Role Switcher',
@@ -235,16 +277,174 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLastActionFeedback(`Demonstration role switched to ${role}.`);
   };
 
+  const evaluateScopedAction = (
+    scope: PermissionScopeId | 'MODIFY_BANK_ACCOUNT' | 'APPROVE_HIGH_RISK_REQUEST',
+    actionDescription: string
+  ) => {
+    const ts = nowStamp();
+    const check = checkActionPermission(state.activeRole, state.permissions, scope);
+    setState((prev) => ({
+      ...prev,
+      auditEvents: [
+        {
+          id: `aud-perm-check-${Date.now()}`,
+          timestamp: ts,
+          actor: getActorLabel(prev.activeRole),
+          action: `${actionDescription} — ${check.reason}`,
+          outcome: check.allowed ? 'Allowed' : 'Blocked',
+          source: 'Centralized Permission Policy Engine',
+          riskClassification: check.riskClassification,
+        },
+        ...prev.auditEvents,
+      ],
+    }));
+    setLastActionFeedback(check.reason);
+    return { allowed: check.allowed, reason: check.reason };
+  };
+
   const setDiagnosticScenarioId = (id: DiagnosticScenarioId) => {
-    setState((prev) => ({ ...prev, diagnosticScenarioId: id }));
-    setLastActionFeedback(`Loaded diagnostic scenario: ${id.replace(/_/g, ' ')}`);
+    const ts = nowStamp();
+    setState((prev) => ({
+      ...prev,
+      diagnosticScenarioId: id,
+      auditEvents: [
+        {
+          id: `aud-diag-case-${Date.now()}`,
+          timestamp: ts,
+          actor: getActorLabel(prev.activeRole),
+          action: `Evaluated deterministic payment diagnosis case: "${id.replace(/_/g, ' ')}"`,
+          outcome: 'Recorded locally',
+          source: 'Payment Diagnosis Engine',
+          riskClassification: 'Standard',
+        },
+        ...prev.auditEvents,
+      ],
+    }));
+    setLastActionFeedback(`Evaluated diagnostic scenario: ${id.replace(/_/g, ' ')}`);
+  };
+
+  const runDiagnosticEvaluation = (id?: DiagnosticScenarioId) => {
+    const targetId = id || state.diagnosticScenarioId;
+    const ts = nowStamp();
+    setState((prev) => ({
+      ...prev,
+      diagnosticScenarioId: targetId,
+      auditEvents: [
+        {
+          id: `aud-diag-rerun-${Date.now()}`,
+          timestamp: ts,
+          actor: getActorLabel(prev.activeRole),
+          action: `Re-ran deterministic rule evaluation for scenario "${targetId.replace(/_/g, ' ')}"`,
+          outcome: 'Recorded locally',
+          source: 'Payment Diagnosis Engine',
+          riskClassification: 'Standard',
+        },
+        ...prev.auditEvents,
+      ],
+    }));
+    setLastActionFeedback(
+      `Re-ran deterministic payment diagnosis for "${targetId.replace(/_/g, ' ')}" at ${ts}.`
+    );
+  };
+
+  const markDiagnosticStepComplete = (title: string, description: string, source: string) => {
+    const ts = nowStamp();
+    setState((prev) => {
+      const existing = prev.checklist.find(
+        (c) => c.title.toLowerCase() === title.toLowerCase()
+      );
+      let nextChecklist: ChecklistItem[];
+      if (existing) {
+        nextChecklist = prev.checklist.map((c) =>
+          c.id === existing.id ? { ...c, completed: !c.completed } : c
+        );
+      } else {
+        nextChecklist = [
+          {
+            id: `chk-diag-${Date.now()}`,
+            title,
+            description,
+            category: 'Payment Diagnosis',
+            completed: true,
+            source,
+          },
+          ...prev.checklist,
+        ];
+      }
+      const isNowComplete = existing ? !existing.completed : true;
+      return {
+        ...prev,
+        checklist: nextChecklist,
+        auditEvents: [
+          {
+            id: `aud-diag-step-${Date.now()}`,
+            timestamp: ts,
+            actor: getActorLabel(prev.activeRole),
+            action: `${isNowComplete ? 'Marked diagnostic action complete' : 'Reopened diagnostic action'}: "${title}"`,
+            outcome: 'Recorded locally',
+            source: 'Payment Diagnosis Engine',
+            riskClassification: 'Standard',
+          },
+          ...prev.auditEvents,
+        ],
+      };
+    });
+    setLastActionFeedback(`Updated diagnostic action in your checklist & activity history: "${title}"`);
+  };
+
+  const prepareDiagnosisEnquiry = (diagnosisTitle: string, eventCode: string) => {
+    const ts = nowStamp();
+    const check = checkActionPermission(state.activeRole, state.permissions, 'prepare_enquiry');
+    if (!check.allowed) {
+      setState((prev) => ({
+        ...prev,
+        auditEvents: [
+          {
+            id: `aud-enq-deny-${Date.now()}`,
+            timestamp: ts,
+            actor: getActorLabel(prev.activeRole),
+            action: `Attempted to prepare payment enquiry while permission was not granted (${check.reason})`,
+            outcome: 'Blocked',
+            source: 'Payment Diagnosis Engine',
+            riskClassification: 'Elevated',
+          },
+          ...prev.auditEvents,
+        ],
+      }));
+      setLastActionFeedback(check.reason);
+      return { allowed: false, message: check.reason };
+    }
+
+    setState((prev) => ({
+      ...prev,
+      auditEvents: [
+        {
+          id: `aud-enq-ok-${Date.now()}`,
+          timestamp: ts,
+          actor: getActorLabel(prev.activeRole),
+          action: `Prepared citizen service-desk payment enquiry draft for "${diagnosisTitle}" (Event: ${eventCode})`,
+          outcome: 'Recorded locally',
+          source: 'Payment Diagnosis Engine',
+          riskClassification: 'Standard',
+        },
+        ...prev.auditEvents,
+      ],
+    }));
+    const msg = `Prepared local service-desk enquiry summary for "${diagnosisTitle}" (Not officially submitted).`;
+    setLastActionFeedback(msg);
+    return { allowed: true, message: msg };
   };
 
   const attemptStateMachineTransition = (
     process: 'application' | 'verification' | 'renewal' | 'payment',
     nextState: string
   ) => {
-    const res = transitionBenefitProcess(state.stateMachines, process, nextState, nowStamp().slice(0, 10));
+    const res = transitionBenefitProcess(
+      state.stateMachines,
+      process,
+      nextState,
+      nowStamp().slice(0, 10)
+    );
     const ts = nowStamp();
     if (!res.success) {
       setState((prev) => ({
@@ -274,12 +474,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         {
           id: `aud-sm-ok-${Date.now()}`,
           timestamp: ts,
-          actor:
-            prev.activeRole === 'Beneficiary'
-              ? 'Lakshmi Devi (Beneficiary)'
-              : prev.activeRole === 'Caregiver'
-                ? 'Arjun (Caregiver)'
-                : 'Service Officer (Demo)',
+          actor: getActorLabel(prev.activeRole),
           action: `Transitioned ${process} state machine to "${nextState}" (other 3 benefit states unchanged)`,
           outcome: 'Allowed',
           source: 'Benefit State Machine',
@@ -300,11 +495,14 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     source: string
   ) => {
     const ts = nowStamp();
+    const existsAlready = state.checklist.some(
+      (item) => item.title.toLowerCase() === title.toLowerCase()
+    );
+    if (existsAlready) {
+      setLastActionFeedback(`Checklist item already present: "${title}"`);
+      return;
+    }
     setState((prev) => {
-      const exists = prev.checklist.some((item) => item.title.toLowerCase() === title.toLowerCase());
-      if (exists) {
-        return prev;
-      }
       const newItem: ChecklistItem = {
         id: `chk-${Date.now()}`,
         title,
@@ -320,7 +518,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           {
             id: `aud-chk-add-${Date.now()}`,
             timestamp: ts,
-            actor: 'Lakshmi Devi (Beneficiary)',
+            actor: getActorLabel(prev.activeRole),
             action: `Added recommended action to checklist: "${title}"`,
             outcome: 'Recorded locally',
             source,
@@ -337,7 +535,9 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const ts = nowStamp();
     setState((prev) => {
       const target = prev.checklist.find((c) => c.id === id);
-      const updated = prev.checklist.map((c) => (c.id === id ? { ...c, completed: !c.completed } : c));
+      const updated = prev.checklist.map((c) =>
+        c.id === id ? { ...c, completed: !c.completed } : c
+      );
       return {
         ...prev,
         checklist: updated,
@@ -346,7 +546,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               {
                 id: `aud-chk-toggle-${Date.now()}`,
                 timestamp: ts,
-                actor: 'Lakshmi Devi (Beneficiary)',
+                actor: getActorLabel(prev.activeRole),
                 action: `${!target.completed ? 'Completed' : 'Reopened'} checklist item: "${target.title}"`,
                 outcome: 'Recorded locally',
                 source: 'Task Checklist',
@@ -360,27 +560,134 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const toggleDocumentReminder = (docId: string) => {
-    setState((prev) => ({
-      ...prev,
-      documents: prev.documents.map((d) =>
-        d.id === docId ? { ...d, reminderEnabled: !d.reminderEnabled } : d
-      ),
-    }));
+    const ts = nowStamp();
+    const permCheck = checkActionPermission(state.activeRole, state.permissions, 'view_reminders');
+    if (!permCheck.allowed) {
+      setState((prev) => ({
+        ...prev,
+        auditEvents: [
+          {
+            id: `aud-rem-deny-${Date.now()}`,
+            timestamp: ts,
+            actor: getActorLabel(prev.activeRole),
+            action: `Blocked attempt to modify document reminder (${permCheck.reason})`,
+            outcome: 'Blocked',
+            source: 'Documents & Deadlines',
+            riskClassification: 'Elevated',
+          },
+          ...prev.auditEvents,
+        ],
+      }));
+      setLastActionFeedback(permCheck.reason);
+      return;
+    }
+
+    setState((prev) => {
+      const target = prev.documents.find((d) => d.id === docId);
+      const nextEnabled = target ? !target.reminderEnabled : true;
+      return {
+        ...prev,
+        documents: prev.documents.map((d) =>
+          d.id === docId ? { ...d, reminderEnabled: nextEnabled } : d
+        ),
+        auditEvents: target
+          ? [
+              {
+                id: `aud-rem-toggle-${Date.now()}`,
+                timestamp: ts,
+                actor: getActorLabel(prev.activeRole),
+                action: `${nextEnabled ? 'Enabled' : 'Disabled'} reminder for document "${target.name}"`,
+                outcome: 'Recorded locally',
+                source: 'Documents & Deadlines',
+                riskClassification: 'Standard',
+              },
+              ...prev.auditEvents,
+            ]
+          : prev.auditEvents,
+      };
+    });
     setLastActionFeedback('Document reminder preference updated locally.');
   };
 
-  const changeDocumentReminderChannel = (docId: string, channel: DocumentItem['reminderChannel']) => {
-    setState((prev) => ({
-      ...prev,
-      documents: prev.documents.map((d) =>
-        d.id === docId ? { ...d, reminderChannel: channel, reminderEnabled: true } : d
-      ),
-    }));
+  const changeDocumentReminderChannel = (
+    docId: string,
+    channel: DocumentItem['reminderChannel']
+  ) => {
+    const ts = nowStamp();
+    const permCheck = checkActionPermission(state.activeRole, state.permissions, 'view_reminders');
+    if (!permCheck.allowed) {
+      setState((prev) => ({
+        ...prev,
+        auditEvents: [
+          {
+            id: `aud-rem-ch-deny-${Date.now()}`,
+            timestamp: ts,
+            actor: getActorLabel(prev.activeRole),
+            action: `Blocked attempt to change reminder channel (${permCheck.reason})`,
+            outcome: 'Blocked',
+            source: 'Documents & Deadlines',
+            riskClassification: 'Elevated',
+          },
+          ...prev.auditEvents,
+        ],
+      }));
+      setLastActionFeedback(permCheck.reason);
+      return;
+    }
+
+    setState((prev) => {
+      const target = prev.documents.find((d) => d.id === docId);
+      return {
+        ...prev,
+        documents: prev.documents.map((d) =>
+          d.id === docId ? { ...d, reminderChannel: channel, reminderEnabled: true } : d
+        ),
+        auditEvents: target
+          ? [
+              {
+                id: `aud-rem-ch-${Date.now()}`,
+                timestamp: ts,
+                actor: getActorLabel(prev.activeRole),
+                action: `Changed reminder channel for "${target.name}" to ${channel}`,
+                outcome: 'Recorded locally',
+                source: 'Documents & Deadlines',
+                riskClassification: 'Standard',
+              },
+              ...prev.auditEvents,
+            ]
+          : prev.auditEvents,
+      };
+    });
     setLastActionFeedback(`Reminder channel updated to ${channel}.`);
   };
 
   const markDocumentCompleted = (docId: string) => {
     const ts = nowStamp();
+    const permCheck = checkActionPermission(
+      state.activeRole,
+      state.permissions,
+      'help_with_documents'
+    );
+    if (!permCheck.allowed) {
+      setState((prev) => ({
+        ...prev,
+        auditEvents: [
+          {
+            id: `aud-doc-deny-${Date.now()}`,
+            timestamp: ts,
+            actor: getActorLabel(prev.activeRole),
+            action: `Blocked attempt to mark document task completed (${permCheck.reason})`,
+            outcome: 'Blocked',
+            source: 'Documents & Deadlines',
+            riskClassification: 'Elevated',
+          },
+          ...prev.auditEvents,
+        ],
+      }));
+      setLastActionFeedback(permCheck.reason);
+      return;
+    }
+
     setState((prev) => {
       const target = prev.documents.find((d) => d.id === docId);
       const nextCompleted = target ? !target.completed : true;
@@ -406,9 +713,11 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               {
                 id: `aud-doc-${Date.now()}`,
                 timestamp: ts,
-                actor: 'Lakshmi Devi (Beneficiary)',
+                actor: getActorLabel(prev.activeRole),
                 action: `Marked document preparation "${target.name}" as ${
-                  nextCompleted ? 'Completed in local checklist (not officially submitted)' : 'Pending'
+                  nextCompleted
+                    ? 'Completed in local checklist (not officially submitted)'
+                    : 'Pending'
                 }`,
                 outcome: 'Recorded locally',
                 source: 'Documents & Deadlines',
@@ -496,6 +805,19 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           },
           ...prev.auditEvents,
         ],
+        notifications: [
+          {
+            id: `notif-perm-exp-${Date.now()}`,
+            timestamp: ts,
+            title: `Caregiver Permission Expired: ${target.title}`,
+            message: `Time-limited permission "${target.title}" for Arjun has expired and now requires renewal by Lakshmi Devi.`,
+            lockScreenPreviewSafe: 'SEVA SUTRA: A helper permission has expired.',
+            category: 'Security',
+            severity: 'warning',
+            read: false,
+          },
+          ...prev.notifications,
+        ],
       };
     });
     setLastActionFeedback('Simulated time-based expiry for caregiver permission.');
@@ -545,7 +867,8 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           id: `aud-cancel-hr-${Date.now()}`,
           timestamp: ts,
           actor: 'Lakshmi Devi (Beneficiary)',
-          action: 'Cancelled pending caregiver bank account change request during cooling-off period',
+          action:
+            'Cancelled pending caregiver bank account change request during cooling-off period',
           outcome: 'Allowed',
           source: 'Beneficiary Safeguard Review',
           riskClassification: 'High Risk',
@@ -557,7 +880,8 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           id: `notif-cancel-hr-${Date.now()}`,
           timestamp: ts,
           title: 'Bank Change Request Cancelled by You',
-          message: 'You cancelled the pending bank account change request. Your pension account XXXX-4821 remains unchanged.',
+          message:
+            'You cancelled the pending bank account change request. Your pension account XXXX-4821 remains unchanged.',
           lockScreenPreviewSafe: 'SEVA SUTRA: Your security review action was completed.',
           category: 'Security',
           severity: 'success',
@@ -566,12 +890,18 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ...prev.notifications,
       ],
     }));
-    setLastActionFeedback('Bank account change request cancelled. Your existing account remains protected.');
+    setLastActionFeedback(
+      'Bank account change request cancelled. Your existing account remains protected.'
+    );
   };
 
   const revokeAllCaregiverPermissions = () => {
     const ts = nowStamp();
-    const res = revokeAllCaregiverAccessAndQuarantine(state.permissions, state.highRiskRequest, ts);
+    const res = revokeAllCaregiverAccessAndQuarantine(
+      state.permissions,
+      state.highRiskRequest,
+      ts
+    );
     setState((prev) => ({
       ...prev,
       permissions: res.updatedPermissions,
@@ -611,12 +941,61 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLastActionFeedback('All notifications marked as read.');
   };
 
+  const openNotificationRecord = (id: string) => {
+    const target = state.notifications.find((n) => n.id === id);
+    const categoryToPage: Record<NotificationItem['category'], PageId> = {
+      Verification: 'documents-deadlines',
+      Document: 'documents-deadlines',
+      Payment: 'payment-diagnosis',
+      Security: 'caregiver-access',
+      Offline: 'documents-deadlines',
+      Visit: 'assisted-completion',
+    };
+    const nextPage: PageId = target ? categoryToPage[target.category] : 'overview';
+    setState((prev) => ({
+      ...prev,
+      activePage: nextPage,
+      notifications: prev.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    }));
+    window.scrollTo({ top: 0, behavior: state.accessibility.reducedMotion ? 'auto' : 'smooth' });
+    if (target) {
+      setLastActionFeedback(`Opened record for notification: "${target.title}"`);
+    }
+  };
+
+  const saveOfflineDraftExplicitly = (notes?: string) => {
+    const ts = nowStamp();
+    const updatedDraft: OfflineDraft = {
+      ...state.offlineDraft,
+      savedAt: ts,
+      notes: notes !== undefined ? notes : state.offlineDraft.notes,
+    };
+    void saveOfflineDraftToIndexedDB(updatedDraft);
+    setState((prev) => ({
+      ...prev,
+      offlineDraft: updatedDraft,
+      auditEvents: [
+        {
+          id: `aud-draft-save-${Date.now()}`,
+          timestamp: ts,
+          actor: getActorLabel(prev.activeRole),
+          action: `Saved verification checklist progress locally (Last step: "${updatedDraft.lastConfirmedStep}") — Saved locally — not submitted`,
+          outcome: 'Recorded locally',
+          source: 'Offline Recovery Engine',
+          riskClassification: 'Standard',
+        },
+        ...prev.auditEvents,
+      ],
+    }));
+    setLastActionFeedback('Task saved locally — not submitted.');
+  };
+
   const simulateConnectivityLoss = () => {
     const ts = nowStamp();
     const updatedDraft: OfflineDraft = {
       ...state.offlineDraft,
       savedAt: ts,
-      lastConfirmedStep: 'Saving the checklist',
+      lastConfirmedStep: state.offlineDraft.lastConfirmedStep || 'Saving the checklist',
       isOfflineInterrupted: true,
       reconnectedReadBackPending: false,
     };
@@ -630,7 +1009,8 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           id: `aud-offline-${Date.now()}`,
           timestamp: ts,
           actor: 'SEVA SUTRA Safeguard Engine',
-          action: 'Connectivity lost mid-task; preserved verification checklist draft locally (Saved locally — not submitted)',
+          action:
+            'Connectivity lost mid-task; preserved verification checklist draft locally (Saved locally — not submitted)',
           outcome: 'Recorded locally',
           source: 'Offline Recovery Engine',
           riskClassification: 'Standard',
@@ -674,7 +1054,8 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           id: `aud-reconnect-${Date.now()}`,
           timestamp: ts,
           actor: 'SEVA SUTRA Safeguard Engine',
-          action: 'Connection restored; local verification draft recovered with spoken state read-back prompt',
+          action:
+            'Connection restored; local verification draft recovered with spoken state read-back prompt',
           outcome: 'Recorded locally',
           source: 'Offline Recovery Engine',
           riskClassification: 'Standard',
@@ -687,7 +1068,8 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           timestamp: ts,
           title: 'Connection Restored — Local Draft Ready',
           message: tDict.reconnectedBanner,
-          lockScreenPreviewSafe: 'SEVA SUTRA: Connection restored. You may resume your saved task.',
+          lockScreenPreviewSafe:
+            'SEVA SUTRA: Connection restored. You may resume your saved task.',
           category: 'Offline',
           severity: 'success',
           read: false,
@@ -701,6 +1083,31 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const updateOfflineDraftStep = (stepId: string, stepLabel: string, notes?: string) => {
     const ts = nowStamp();
+    const permCheck = checkActionPermission(
+      state.activeRole,
+      state.permissions,
+      'help_with_documents'
+    );
+    if (!permCheck.allowed) {
+      setState((prev) => ({
+        ...prev,
+        auditEvents: [
+          {
+            id: `aud-draft-deny-${Date.now()}`,
+            timestamp: ts,
+            actor: getActorLabel(prev.activeRole),
+            action: `Blocked caregiver attempt to edit verification checklist (${permCheck.reason})`,
+            outcome: 'Blocked',
+            source: 'Offline Recovery Engine',
+            riskClassification: 'Elevated',
+          },
+          ...prev.auditEvents,
+        ],
+      }));
+      setLastActionFeedback(permCheck.reason);
+      return;
+    }
+
     setState((prev) => {
       const exists = prev.offlineDraft.completedStepIds.includes(stepId);
       const nextSteps = exists
@@ -715,14 +1122,22 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         reconnectedReadBackPending: false,
       };
       void saveOfflineDraftToIndexedDB(nextDraft);
+
+      // Sync with main checklist if all 4 steps are completed
+      const allFourDone = nextSteps.length >= 4;
+      const updatedChecklist = prev.checklist.map((item) =>
+        item.id === 'chk-1' && allFourDone ? { ...item, completed: true } : item
+      );
+
       return {
         ...prev,
         offlineDraft: nextDraft,
+        checklist: updatedChecklist,
         auditEvents: [
           {
             id: `aud-draft-step-${Date.now()}`,
             timestamp: ts,
-            actor: 'Lakshmi Devi (Beneficiary)',
+            actor: getActorLabel(prev.activeRole),
             action: `Updated verification draft step "${stepLabel}" (Saved locally — not submitted)`,
             outcome: 'Recorded locally',
             source: 'Offline Recovery Engine',
@@ -738,34 +1153,57 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const continueFromOfflineDraft = () => {
     const ts = nowStamp();
     setState((prev) => {
-      const nextStepId = !prev.offlineDraft.completedStepIds.includes('verif-step-3')
-        ? 'verif-step-3'
-        : 'verif-step-4';
-      const nextStepLabel =
-        nextStepId === 'verif-step-3'
-          ? 'Select preferred verification method (Doorstep visit or Citizen Centre)'
-          : 'Review post-merger bank branch IFSC slip (Account stays in Lakshmi Devi’s name)';
-      const updatedIds = prev.offlineDraft.completedStepIds.includes(nextStepId)
+      const allStepOrder: Array<{ id: string; label: string }> = [
+        {
+          id: 'verif-step-1',
+          label: 'Confirm Pension Sanction ID #SSP-2021-88412 is written down',
+        },
+        {
+          id: 'verif-step-2',
+          label: 'Place original identity card and blue pension passbook in folder',
+        },
+        {
+          id: 'verif-step-3',
+          label: 'Select preferred verification method (Doorstep visit or Citizen Centre)',
+        },
+        {
+          id: 'verif-step-4',
+          label:
+            'Review post-merger bank branch IFSC slip (Account stays in Lakshmi Devi’s name)',
+        },
+      ];
+      const nextUnfinished =
+        allStepOrder.find((s) => !prev.offlineDraft.completedStepIds.includes(s.id)) ||
+        allStepOrder[allStepOrder.length - 1];
+      const updatedIds = prev.offlineDraft.completedStepIds.includes(nextUnfinished.id)
         ? prev.offlineDraft.completedStepIds
-        : [...prev.offlineDraft.completedStepIds, nextStepId];
+        : [...prev.offlineDraft.completedStepIds, nextUnfinished.id];
+
       const nextDraft: OfflineDraft = {
         ...prev.offlineDraft,
         savedAt: ts,
-        lastConfirmedStep: nextStepLabel,
+        lastConfirmedStep: nextUnfinished.label,
         completedStepIds: updatedIds,
         reconnectedReadBackPending: false,
       };
       void saveOfflineDraftToIndexedDB(nextDraft);
+
+      const allDone = updatedIds.length >= 4;
+      const updatedChecklist = prev.checklist.map((item) =>
+        item.id === 'chk-1' && allDone ? { ...item, completed: true } : item
+      );
+
       return {
         ...prev,
         activePage: 'documents-deadlines',
         offlineDraft: nextDraft,
+        checklist: updatedChecklist,
         auditEvents: [
           {
             id: `aud-draft-continue-${Date.now()}`,
             timestamp: ts,
-            actor: 'Lakshmi Devi (Beneficiary)',
-            action: `Resumed verification task after reconnection; continued to "${nextStepLabel}" (Not officially submitted)`,
+            actor: getActorLabel(prev.activeRole),
+            action: `Resumed verification task after reconnection; continued to "${nextUnfinished.label}" (Not officially submitted)`,
             outcome: 'Recorded locally',
             source: 'Offline Recovery Engine',
             riskClassification: 'Standard',
@@ -795,7 +1233,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         {
           id: `aud-draft-repeat-${Date.now()}`,
           timestamp: ts,
-          actor: 'Lakshmi Devi (Beneficiary)',
+          actor: getActorLabel(prev.activeRole),
           action: `Repeated last confirmed step "${prev.offlineDraft.lastConfirmedStep}" after reconnection`,
           outcome: 'Recorded locally',
           source: 'Offline Recovery Engine',
@@ -826,7 +1264,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           {
             id: `aud-visit-${Date.now()}`,
             timestamp: ts,
-            actor: 'Lakshmi Devi (Beneficiary)',
+            actor: getActorLabel(prev.activeRole),
             action: `${
               finalize
                 ? 'Recorded doorstep assistance request locally (Demo request recorded locally — not officially booked)'
@@ -875,7 +1313,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               {
                 id: `aud-sensitive-${Date.now()}`,
                 timestamp: ts,
-                actor: 'Lakshmi Devi (Beneficiary)',
+                actor: getActorLabel(prev.activeRole),
                 action: `Recorded sensitive ${next.reportType} referral for official welfare review — payment ownership and benefit controls preserved`,
                 outcome: 'Recorded locally',
                 source: 'Sensitive Reporting Pathway',
@@ -888,12 +1326,13 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   };
 
-  const setEligibilityInput: React.Dispatch<React.SetStateAction<EligibilityApplicantInput>> = (
-    updater
-  ) => {
+  const setEligibilityInput: React.Dispatch<
+    React.SetStateAction<EligibilityApplicantInput>
+  > = (updater) => {
     setState((prev) => ({
       ...prev,
-      eligibilityInput: typeof updater === 'function' ? updater(prev.eligibilityInput) : updater,
+      eligibilityInput:
+        typeof updater === 'function' ? updater(prev.eligibilityInput) : updater,
     }));
   };
 
@@ -910,7 +1349,9 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       accessibility: { ...prev.accessibility, language: lang },
     }));
     setLastActionFeedback(
-      lang === 'te' ? 'భాష తెలుగులోకి మార్చబడింది (Language switched to Telugu).' : 'Language switched to English.'
+      lang === 'te'
+        ? 'భాష తెలుగులోకి మార్చబడింది (Language switched to Telugu).'
+        : 'Language switched to English.'
     );
   };
 
@@ -970,8 +1411,10 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       );
     } else if (scenarioNumber === 3) {
       const ts = nowStamp();
-      // Ensure permissions are granted first so the unsafe bank-change simulation triggers the 72-hour cooling-off
-      const activePerms = state.permissions.map((p) => ({ ...p, status: 'Granted' as const }));
+      const activePerms = state.permissions.map((p) => ({
+        ...p,
+        status: 'Granted' as const,
+      }));
       const sim = simulateUnsafeBankAccountChangeRequest(activePerms, ts);
       setState((prev) => ({
         ...prev,
@@ -1000,7 +1443,11 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               ts
             ).highRiskRequest
           : state.highRiskRequest;
-      const res = revokeAllCaregiverAccessAndQuarantine(state.permissions, baseHighRisk, ts);
+      const res = revokeAllCaregiverAccessAndQuarantine(
+        state.permissions,
+        baseHighRisk,
+        ts
+      );
       setState((prev) => ({
         ...prev,
         guidedDemoActive: true,
@@ -1062,6 +1509,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     stopSpeakingAloud();
     clearLocalStorageState();
     const fresh = getDefaultState();
+    void saveOfflineDraftToIndexedDB(INITIAL_OFFLINE_DRAFT);
     setState(fresh);
     setSpokenTranscriptBanner(null);
     setLastActionFeedback('Demonstration state reset to initial Lakshmi Devi scenario.');
@@ -1080,6 +1528,10 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setActivePage,
         setActiveRole,
         setDiagnosticScenarioId,
+        runDiagnosticEvaluation,
+        markDiagnosticStepComplete,
+        prepareDiagnosisEnquiry,
+        evaluateScopedAction,
         attemptStateMachineTransition,
         addChecklistItem,
         toggleChecklistItem,
@@ -1095,8 +1547,10 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         triggerPostRevocationAttempt,
         markNotificationRead,
         markAllNotificationsRead,
+        openNotificationRecord,
         simulateConnectivityLoss,
         restoreConnectivity,
+        saveOfflineDraftExplicitly,
         updateOfflineDraftStep,
         continueFromOfflineDraft,
         repeatLastOfflineDraftStep,
@@ -1123,7 +1577,7 @@ export const SevaSutraProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 export const useSevaSutra = (): SevaSutraContextValue => {
   const ctx = useContext(SevaSutraContext);
   if (!ctx) {
-    throw new Error('useSevaSutra must be used within SevaSutraProvider');
+    throw new Error('useSevaSutra must be used inside SevaSutraProvider');
   }
   return ctx;
 };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   AlertOctagon,
   Ban,
+  CheckCircle2,
   Clock,
   Eye,
   Lock,
@@ -10,9 +11,11 @@ import {
   UserCheck,
   UserX,
   Volume2,
+  XCircle,
 } from 'lucide-react';
 import { useSevaSutra } from '../context/SevaSutraContext';
 import { checkActionPermission } from '../logic/permissionAndRisk';
+import { PermissionScopeId } from '../types/models';
 
 export const CaregiverAccessPage: React.FC = () => {
   const {
@@ -28,12 +31,20 @@ export const CaregiverAccessPage: React.FC = () => {
     cancelHighRiskRequestByBeneficiary,
     revokeAllCaregiverPermissions,
     triggerPostRevocationAttempt,
+    evaluateScopedAction,
     speakText,
     t,
   } = useSevaSutra();
 
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [confirmDialogType, setConfirmDialogType] = useState<
+    'revoke_all' | 'cancel_bank_change' | null
+  >(null);
   const [securityFeedbackBanner, setSecurityFeedbackBanner] = useState<string | null>(null);
+  const [policyTestOutcome, setPolicyTestOutcome] = useState<{
+    allowed: boolean;
+    reason: string;
+  } | null>(null);
 
   const bankModifyPermissionCheck = checkActionPermission(
     activeRole,
@@ -51,8 +62,77 @@ export const CaregiverAccessPage: React.FC = () => {
     setSecurityFeedbackBanner(msg);
   };
 
+  const handleRunPolicyTest = (
+    scope: PermissionScopeId | 'MODIFY_BANK_ACCOUNT',
+    label: string
+  ) => {
+    const res = evaluateScopedAction(scope, `Tested action "${label}" as ${activeRole}`);
+    setPolicyTestOutcome(res);
+  };
+
   return (
     <div className="space-y-8">
+      {/* Accessible Confirmation Modal Dialog */}
+      {confirmDialogType && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-dialog-title"
+          className="fixed inset-0 z-50 bg-[#101B2D]/70 flex items-center justify-center p-4"
+        >
+          <div className="bg-[#FFFFFF] rounded-xl border-2 border-[#C5A267] max-w-lg w-full p-6 space-y-4 shadow-xl">
+            <div className="flex items-center gap-2 text-[#B42332] text-xs font-bold uppercase">
+              <ShieldAlert className="w-5 h-5" />
+              <span>Beneficiary Security Confirmation Dialog</span>
+            </div>
+            <h2
+              id="confirm-dialog-title"
+              className="font-display text-xl sm:text-2xl font-extrabold text-[#101B2D]"
+            >
+              {confirmDialogType === 'revoke_all'
+                ? 'Confirm Revoking All Caregiver Permissions?'
+                : 'Confirm Cancelling Pending Bank Account Change Request?'}
+            </h2>
+            <p className="text-sm sm:text-base text-slate-700">
+              {confirmDialogType === 'revoke_all'
+                ? 'Revoking all permissions immediately removes Arjun’s delegated access across all 4 scopes and quarantines any pending high-risk bank account change request.'
+                : 'Cancelling this request permanently stops the pending bank account change. Your pension will continue to be credited to your existing protected account (XXXX-4821).'}
+            </p>
+            <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-[#E2D9C8]">
+              <button
+                type="button"
+                onClick={() => setConfirmDialogType(null)}
+                className="px-4 py-2 rounded-lg border border-[#C5A267] bg-[#F5F0E6] text-[#101B2D] text-sm font-bold"
+              >
+                Keep Current State
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmDialogType === 'revoke_all') {
+                    revokeAllCaregiverPermissions();
+                    setSecurityFeedbackBanner(
+                      'All caregiver permissions revoked and pending bank-change request quarantined.'
+                    );
+                  } else {
+                    cancelHighRiskRequestByBeneficiary();
+                    setSecurityFeedbackBanner(
+                      'Pending bank account change request cancelled by Beneficiary.'
+                    );
+                  }
+                  setConfirmDialogType(null);
+                }}
+                className="px-4 py-2 rounded-lg bg-[#B42332] hover:bg-[#961b28] text-white text-sm font-bold"
+              >
+                {confirmDialogType === 'revoke_all'
+                  ? 'Confirm & Revoke All Access'
+                  : 'Confirm & Cancel Request'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header & Production Security Architecture Note */}
       <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 sm:p-7 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -69,6 +149,15 @@ export const CaregiverAccessPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setConfirmDialogType('revoke_all')}
+              className="px-4 py-2.5 rounded-lg border border-[#B42332] bg-white hover:bg-red-50 text-[#B42332] text-sm font-bold inline-flex items-center gap-2 transition-colors"
+            >
+              <UserX className="w-4 h-4" />
+              <span>Revoke With Confirmation</span>
+            </button>
+
             <button
               type="button"
               onClick={revokeAllCaregiverPermissions}
@@ -386,6 +475,57 @@ export const CaregiverAccessPage: React.FC = () => {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Centralized Permission Enforcement Tester */}
+      <section className="seva-card bg-[#FFFFFF] rounded-xl p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="font-display text-xl font-bold text-[#101B2D]">
+              Live Centralized Authorization &amp; Access-Denied Tester (Active Role: {activeRole})
+            </h2>
+            <p className="text-sm text-slate-700">
+              Permissions are enforced by centralized policy checks rather than hidden buttons. Switch role to <strong>Caregiver</strong>, revoke or expire a scope above, and click any action below to verify live access-denied outcomes and audit logging:
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5">
+          {[
+            { scope: 'view_benefit_status' as const, label: 'Test: View Benefit Status' },
+            { scope: 'help_with_documents' as const, label: 'Test: Help With Documents' },
+            { scope: 'view_reminders' as const, label: 'Test: View & Manage Reminders' },
+            { scope: 'prepare_enquiry' as const, label: 'Test: Prepare an Enquiry' },
+            { scope: 'MODIFY_BANK_ACCOUNT' as const, label: 'Test: Modify Bank Account' },
+          ].map((item) => (
+            <button
+              key={item.scope}
+              type="button"
+              onClick={() => handleRunPolicyTest(item.scope, item.label)}
+              className="px-3.5 py-2 rounded-lg border border-[#C5A267] bg-[#F5F0E6] hover:bg-[#087F68] hover:text-white text-[#101B2D] text-xs sm:text-sm font-bold transition-colors"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {policyTestOutcome && (
+          <div
+            role="status"
+            className={`p-4 rounded-xl border flex items-center gap-2.5 text-sm font-bold ${
+              policyTestOutcome.allowed
+                ? 'bg-[#F5F0E6] border-[#087F68] text-[#101B2D]'
+                : 'bg-red-50 border-[#B42332] text-[#B42332]'
+            }`}
+          >
+            {policyTestOutcome.allowed ? (
+              <CheckCircle2 className="w-5 h-5 text-[#087F68] shrink-0" />
+            ) : (
+              <XCircle className="w-5 h-5 text-[#B42332] shrink-0" />
+            )}
+            <span>{policyTestOutcome.reason}</span>
+          </div>
+        )}
       </section>
 
       {/* Second Trusted Contact & Audit History */}

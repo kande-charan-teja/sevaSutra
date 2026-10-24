@@ -301,7 +301,7 @@ export const TechnicalEvaluationPage: React.FC = () => {
                 <div className="flex items-center justify-between font-bold text-[#101B2D]">
                   <span>{sc.title}</span>
                   <span className="text-[#087F68]">
-                    {sc.blockedOrEscalated ? 'BLOCKED / ESCALATED ✓' : 'FAILED'}
+                    {sc.blockedOrEscalated ? 'BLOCKED / ESCALATED' : 'FAILED'}
                   </span>
                 </div>
                 <p className="text-[#334155]">{sc.description}</p>
@@ -398,7 +398,7 @@ export const TechnicalEvaluationPage: React.FC = () => {
                         {c.actualClassification}
                       </td>
                       <td className="py-3 font-bold text-[#087F68]">
-                        {c.passed ? 'PASS ✓' : 'FAIL'}
+                        {c.passed ? 'PASS' : 'FAIL'}
                       </td>
                     </tr>
                   ))}

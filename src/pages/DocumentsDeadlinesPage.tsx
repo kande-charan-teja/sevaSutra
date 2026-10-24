@@ -4,9 +4,11 @@ import {
   CheckCircle2,
   CheckSquare,
   Clock,
+  ListPlus,
   PauseCircle,
   PlayCircle,
   RotateCcw,
+  Save,
   Square,
   Volume2,
   Wifi,
@@ -40,10 +42,12 @@ export const DocumentsDeadlinesPage: React.FC = () => {
     toggleDocumentReminder,
     changeDocumentReminderChannel,
     markDocumentCompleted,
+    addChecklistItem,
     offlineDraft,
     isOfflineSimulated,
     simulateConnectivityLoss,
     restoreConnectivity,
+    saveOfflineDraftExplicitly,
     updateOfflineDraftStep,
     continueFromOfflineDraft,
     repeatLastOfflineDraftStep,
@@ -54,6 +58,15 @@ export const DocumentsDeadlinesPage: React.FC = () => {
   const [selectedDocId, setSelectedDocId] = useState<string>(documents[0]?.id || 'doc-life-cert');
   const [taskPaused, setTaskPaused] = useState<boolean>(false);
   const selectedDoc = documents.find((d) => d.id === selectedDocId) || documents[0];
+
+  const handleAddDocTaskToChecklist = (doc: DocumentItem) => {
+    addChecklistItem(
+      `Prepare ${doc.name}: ${doc.requiredAction}`,
+      doc.plainLanguageNextStep,
+      doc.category === 'Identity & Life Certificate' ? 'Verification' : 'Documents',
+      `Documents & Deadlines (${doc.name})`
+    );
+  };
 
   return (
     <div className="space-y-8">
@@ -188,13 +201,21 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setSelectedDocId(doc.id)}
                     className="px-3 py-1.5 rounded-lg border border-[#C5A267] bg-[#F5F0E6] text-xs sm:text-sm font-bold text-[#101B2D] hover:bg-[#ebe3d3]"
                   >
                     Inspect Details
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddDocTaskToChecklist(doc)}
+                    className="px-3 py-1.5 rounded-lg border border-[#087F68] bg-white text-xs sm:text-sm font-bold text-[#087F68] hover:bg-[#F5F0E6] inline-flex items-center gap-1"
+                  >
+                    <ListPlus className="w-3.5 h-3.5" />
+                    <span>Add to Checklist</span>
                   </button>
                   <button
                     type="button"
@@ -237,9 +258,31 @@ export const DocumentsDeadlinesPage: React.FC = () => {
             <h3 className="font-display text-xl font-bold text-[#101B2D]">
               {selectedDoc.name}
             </h3>
+            <div className="text-xs font-mono text-slate-600">
+              Deadline: {selectedDoc.expiryDate} ({selectedDoc.daysRemaining} days remaining) · Status: {selectedDoc.verificationStatus}
+            </div>
             <p className="text-base text-slate-800 leading-relaxed">
               {selectedDoc.plainLanguageNextStep}
             </p>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => handleAddDocTaskToChecklist(selectedDoc)}
+                className="px-3.5 py-2 rounded-lg bg-[#087F68] hover:bg-[#066552] text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5"
+              >
+                <ListPlus className="w-4 h-4" />
+                <span>Add Task to My Checklist</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => markDocumentCompleted(selectedDoc.id)}
+                className="px-3.5 py-2 rounded-lg border border-[#C5A267] bg-[#F5F0E6] text-[#101B2D] text-xs sm:text-sm font-bold inline-flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="w-4 h-4 text-[#087F68]" />
+                <span>{selectedDoc.completed ? 'Reopen Document Task' : 'Mark Document Complete'}</span>
+              </button>
+            </div>
 
             <div className="p-3.5 rounded-xl bg-[#F5F0E6] border border-[#C5A267] text-xs sm:text-sm text-[#101B2D]">
               <strong>Privacy &amp; Honesty Note:</strong> This prototype does not collect real government ID numbers or transmit documents to an external authority. Marking a task completed updates your local demonstration checklist.
@@ -269,11 +312,20 @@ export const DocumentsDeadlinesPage: React.FC = () => {
             </div>
 
             <p className="text-sm text-slate-700">
-              Test dropping connectivity mid-task. Your checklist state is saved locally in IndexedDB and LocalStorage. After reconnection, use <strong>Continue</strong> or <strong>Repeat last step</strong>.
+              Select a step below, save your checklist draft, and test an offline drop. Your progress is preserved across page refreshes in IndexedDB and LocalStorage.
             </p>
 
-            {/* Offline / Reconnect / Pause Controls */}
+            {/* Offline / Save / Reconnect / Pause Controls */}
             <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => saveOfflineDraftExplicitly()}
+                className="px-3.5 py-2 rounded-lg bg-[#101B2D] hover:bg-slate-800 text-white text-xs sm:text-sm font-bold inline-flex items-center gap-1.5"
+              >
+                <Save className="w-4 h-4 text-[#C5A267]" />
+                <span>Save Task Locally</span>
+              </button>
+
               <button
                 type="button"
                 onClick={simulateConnectivityLoss}
@@ -325,7 +377,7 @@ export const DocumentsDeadlinesPage: React.FC = () => {
                 Post-Reconnection Task Resumption Controls
               </div>
               <p className="text-xs sm:text-sm text-slate-800">
-                Last confirmed step: <strong>{offlineDraft.lastConfirmedStep}</strong>. Verification has <strong>not</strong> been officially submitted.
+                Last confirmed step: <strong>{offlineDraft.lastConfirmedStep}</strong> (Saved at {offlineDraft.savedAt}). Verification has <strong>not</strong> been officially submitted.
               </p>
               <div className="flex flex-wrap gap-2">
                 <button

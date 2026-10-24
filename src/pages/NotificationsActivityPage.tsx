@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  ArrowRight,
   Bell,
   CheckCheck,
   Filter,
@@ -17,21 +18,24 @@ export const NotificationsActivityPage: React.FC = () => {
     updateAccessibility,
     markNotificationRead,
     markAllNotificationsRead,
+    openNotificationRecord,
     speakText,
   } = useSevaSutra();
 
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [riskFilter, setRiskFilter] = useState<string>('All');
+  const [actorFilter, setActorFilter] = useState<string>('All');
 
   const filteredNotifications =
     categoryFilter === 'All'
       ? notifications
       : notifications.filter((n) => n.category === categoryFilter);
 
-  const filteredAudit =
-    riskFilter === 'All'
-      ? auditEvents
-      : auditEvents.filter((a) => a.riskClassification === riskFilter);
+  const filteredAudit = auditEvents.filter((a) => {
+    const matchesRisk = riskFilter === 'All' || a.riskClassification === riskFilter;
+    const matchesActor = actorFilter === 'All' || a.actor === actorFilter;
+    return matchesRisk && matchesActor;
+  });
 
   return (
     <div className="space-y-8">
@@ -147,7 +151,15 @@ export const NotificationsActivityPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex items-center gap-2.5 shrink-0">
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => openNotificationRecord(n.id)}
+                  className="px-3.5 py-2 rounded-lg bg-[#101B2D] hover:bg-slate-800 text-white text-sm font-semibold inline-flex items-center gap-1.5"
+                >
+                  <span>Open Record</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#C5A267]" />
+                </button>
                 <button
                   type="button"
                   onClick={() =>
@@ -209,6 +221,33 @@ export const NotificationsActivityPage: React.FC = () => {
               )
             )}
           </div>
+        </div>
+
+        {/* Actor Filter Row */}
+        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm pt-1 border-t border-[#C5A267]/25">
+          <span className="font-bold text-[#101B2D] mr-1">Filter by Actor:</span>
+          {(
+            [
+              'All',
+              'Lakshmi Devi (Beneficiary)',
+              'Arjun (Caregiver)',
+              'Service Officer (Demo)',
+              'SEVA SUTRA Safeguard Engine',
+            ] as const
+          ).map((actor) => (
+            <button
+              key={actor}
+              type="button"
+              onClick={() => setActorFilter(actor)}
+              className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
+                actorFilter === actor
+                  ? 'bg-[#087F68] text-white'
+                  : 'bg-[#F5F0E6] text-[#101B2D] border border-[#C5A267]/35 hover:bg-[#EAE3D5]'
+              }`}
+            >
+              {actor}
+            </button>
+          ))}
         </div>
 
         <div className="overflow-x-auto">

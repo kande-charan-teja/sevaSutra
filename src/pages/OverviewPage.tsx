@@ -16,6 +16,7 @@ import {
   Volume2,
 } from 'lucide-react';
 import { useSevaSutra } from '../context/SevaSutraContext';
+import { ChecklistItem, PageId } from '../types/models';
 
 const DASHBOARD_SCENARIOS: Array<{
   num: 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -51,10 +52,18 @@ export const OverviewPage: React.FC = () => {
 
   const expiringDoc =
     documents.find((d) => d.id === 'doc-disability-cert') || documents[1];
+  const pendingChecklistCount = checklist.filter((c) => !c.completed).length;
+  const completedChecklistCount = checklist.filter((c) => c.completed).length;
+
+  const getCategoryTargetPage = (category: ChecklistItem['category']): PageId => {
+    if (category === 'Payment Diagnosis') return 'payment-diagnosis';
+    if (category === 'Safety') return 'caregiver-access';
+    return 'documents-deadlines';
+  };
 
   const handleReadOverview = () => {
     speakText(
-      `${t.dashboardIntro} Application status is ${stateMachines.application}. Identity verification is Due in 12 days. Supporting document is approaching expiry in ${expiringDoc.daysRemaining} days. Pension payment is ${stateMachines.payment}, three months late.`
+      `${t.dashboardIntro} Application status is ${stateMachines.application}. Identity verification is Due in 12 days (${stateMachines.verification}). Supporting document is ${expiringDoc.verificationStatus} (${expiringDoc.daysRemaining} days left). Pension payment is ${stateMachines.payment}, three months late.`
     );
   };
 
@@ -233,15 +242,20 @@ export const OverviewPage: React.FC = () => {
 
               <div className="space-y-1">
                 <div className="font-display text-2xl font-extrabold text-[#101B2D] tabular-nums">
-                  Due in 12 days
+                  {stateMachines.verification === 'Due soon'
+                    ? 'Due in 12 days'
+                    : stateMachines.verification}
                 </div>
                 <p className="text-sm text-slate-700">
-                  State machine: <strong>{stateMachines.verification}</strong> (Not Expired)
+                  State machine: <strong>{stateMachines.verification}</strong>{' '}
+                  {stateMachines.verification !== 'Expired' ? '(Not Expired)' : '(Expired)'}
                 </p>
               </div>
 
               <p className="text-base text-[#101B2D] leading-relaxed">
-                Next action: Complete annual life certificate checklist or book doorstep officer visit before Nov 05.
+                {stateMachines.verification === 'Verified'
+                  ? 'Annual identity verification is recorded as Verified in the current demonstration state.'
+                  : 'Next action: Complete annual life certificate checklist or book doorstep officer visit before Nov 05.'}
               </p>
             </div>
 
@@ -272,10 +286,12 @@ export const OverviewPage: React.FC = () => {
 
               <div className="space-y-1">
                 <div className="font-display text-xl sm:text-2xl font-extrabold text-[#101B2D]">
-                  Supporting document approaching expiry
+                  {expiringDoc.completed
+                    ? 'Supporting document prepared (Local Demo)'
+                    : 'Supporting document approaching expiry'}
                 </div>
                 <p className="text-sm text-slate-700 tabular-nums">
-                  {expiringDoc.name} ({expiringDoc.daysRemaining} days left)
+                  {expiringDoc.name} ({expiringDoc.daysRemaining} days left · {expiringDoc.verificationStatus})
                 </p>
               </div>
 
@@ -311,7 +327,9 @@ export const OverviewPage: React.FC = () => {
 
               <div className="space-y-1">
                 <div className="font-display text-xl sm:text-2xl font-extrabold text-[#B42332]">
-                  Delayed — investigate the recorded cause
+                  {stateMachines.payment === 'Delayed'
+                    ? 'Delayed — investigate the recorded cause'
+                    : `${stateMachines.payment} — inspect payment status`}
                 </div>
                 <p className="text-sm font-mono text-slate-700 tabular-nums">
                   3 months late · Event: NEFT_RETURN_ERR_IFSC_MERGED_404
@@ -319,7 +337,7 @@ export const OverviewPage: React.FC = () => {
               </div>
 
               <p className="text-base text-[#101B2D] leading-relaxed">
-                3 monthly installments (₹2,500/mo) returned due to post-merger branch IFSC code. Application remains Approved.
+                3 monthly installments (₹2,500/mo) returned due to post-merger branch IFSC code. Application remains {stateMachines.application}.
               </p>
             </div>
 
@@ -374,10 +392,15 @@ export const OverviewPage: React.FC = () => {
       {/* What should I do next? + Recommended Actions Checklist */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7 seva-card bg-[#FFFFFF] rounded-xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-bold text-[#101B2D]">
-              {t.whatShouldIDoNext}
-            </h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="space-y-0.5">
+              <h2 className="font-display text-2xl font-bold text-[#101B2D]">
+                {t.whatShouldIDoNext}
+              </h2>
+              <p className="text-xs font-mono text-[#087F68] font-bold">
+                Derived from live beneficiary state · {pendingChecklistCount} pending / {completedChecklistCount} completed
+              </p>
+            </div>
             <button
               type="button"
               onClick={() =>
@@ -393,14 +416,14 @@ export const OverviewPage: React.FC = () => {
           </div>
 
           <p className="text-base text-slate-700">
-            Your pension application is <strong>Approved</strong>. You do not need to reapply. Complete these prioritised next actions:
+            Your pension application is <strong>{stateMachines.application}</strong>. You do not need to reapply. Complete these prioritised next actions:
           </p>
 
           <div className="space-y-3">
             {checklist.map((item) => (
               <div
                 key={item.id}
-                className={`p-4 rounded-xl border transition-colors flex items-start justify-between gap-3 ${
+                className={`p-4 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                   item.completed
                     ? 'bg-[#F5F0E6] border-[#087F68]'
                     : 'bg-[#FFFFFF] border-[#E2D9C8]'
@@ -429,8 +452,21 @@ export const OverviewPage: React.FC = () => {
                       <span>Category: {item.category}</span>
                       <span aria-hidden="true"> · </span>
                       <span>Source: {item.source}</span>
+                      <span aria-hidden="true"> · </span>
+                      <span className="font-bold text-[#087F68]">
+                        {item.completed ? 'Completed' : 'Pending Action'}
+                      </span>
                     </div>
                   </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActivePage(getCategoryTargetPage(item.category))}
+                  className="px-3 py-1.5 rounded-lg border border-[#C5A267] bg-[#F5F0E6] hover:bg-[#ebe3d3] text-[#101B2D] text-xs font-bold inline-flex items-center gap-1 shrink-0 self-end sm:self-center"
+                >
+                  <span>Open Workflow</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}
@@ -564,7 +600,7 @@ export const OverviewPage: React.FC = () => {
                               : 'bg-white border-[#E2D9C8] text-slate-600'
                           }`}
                         >
-                          {step} {active ? '✓' : ''}
+                          {step} {active ? '(Current)' : ''}
                         </div>
                       );
                     })}
@@ -623,7 +659,7 @@ export const OverviewPage: React.FC = () => {
                                 : 'bg-white border-[#E2D9C8] text-slate-600'
                             }`}
                           >
-                            {step} {active ? '●' : ''}
+                            {step} {active ? '(Current)' : ''}
                           </div>
                         );
                       }
@@ -682,7 +718,7 @@ export const OverviewPage: React.FC = () => {
                               : 'bg-white border-[#E2D9C8] text-slate-600'
                           }`}
                         >
-                          {step} {active ? '●' : ''}
+                          {step} {active ? '(Current)' : ''}
                         </div>
                       );
                     })}
@@ -711,7 +747,7 @@ export const OverviewPage: React.FC = () => {
                               : 'bg-white border-[#E2D9C8] text-slate-600'
                           }`}
                         >
-                          {step} {active ? '▲' : ''}
+                          {step} {active ? '(Current)' : ''}
                         </div>
                       );
                     })}
